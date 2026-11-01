@@ -9,3 +9,7 @@ logs/
 
 # Virtual environments
 .venv
+uv.lock
+
+# Environment variables
+.env
