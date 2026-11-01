@@ -3,7 +3,7 @@ services:
     image: mysql
     restart: always
     env_file: 
-      - ../.env
+      - ./.env
     ports:
       - "3306:3306"
     volumes:
@@ -17,5 +17,16 @@ services:
       - 8080:80
     depends_on:
       - db
+    
+  doc_manager_api:
+    build: services/doc_manager_service
+    restart: always
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    env_file: 
+      - ./.env
+      
 volumes:
   db-data:

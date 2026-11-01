@@ -15,6 +15,6 @@ dev = [
 
 [tool.uv.workspace]
 members = [
-    "services/parser-service",
-    "services/doc-manager-service",
+    "services/parser_service",
+    "services/doc_manager_service",
 ]
