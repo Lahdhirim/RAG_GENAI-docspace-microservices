@@ -23,3 +23,10 @@ Codex was given the following instructions:
 - Submit all frontend changes through a dedicated GitHub Pull Request for review.
 
 Available on http://localhost:4200/
+
+## Prerequisites
+
+Before running the application, ensure you have the following installed:
+- Docker and Docker Compose
+- Node.js and npm (for the frontend)
+- Python 3.9+ (for the backend)

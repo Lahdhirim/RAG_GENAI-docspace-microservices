@@ -1,5 +1,4 @@
 services:
-
   redis:
     image: "redis:alpine"
     container_name: redis-service
@@ -57,6 +56,18 @@ services:
       - ./.env
     volumes:
       - ./data:/app/data
+  web_app:
+    build:
+      context: ./src/app
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "4200:4200"
+    environment:
+      - ENV=production
+    depends_on:
+      - db
+      - doc_manager_api
       
 volumes:
   db-data:

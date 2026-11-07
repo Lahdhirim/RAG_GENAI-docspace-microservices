@@ -1,11 +1,17 @@
-// Keep the Angular page route and the existing API URL on the same origin.
+const env = process.env.ENV || "development";
+const host = env === "production" ? "doc_manager_api" : "127.0.0.1";
+
+console.log(`Connecting to API host: ${host}`);
+
 module.exports = {
   "/documents": {
-    target: "http://127.0.0.1:8000",
+    target: `http://${host}:8000`,
     secure: false,
     changeOrigin: true,
     bypass(request) {
-      if (request.headers.accept?.includes("text/html")) return "/index.html";
+      if (request.headers.accept?.includes("text/html")) {
+        return "/index.html";
+      }
       return undefined;
     },
   },
