@@ -1,6 +1,6 @@
 from apscheduler.schedulers.blocking import BlockingScheduler
-from components.scanner import scan_documents
+from components.scanner import sync_documents
 
 scheduler = BlockingScheduler()
-scheduler.add_job(lambda: scan_documents("data/"), "interval", minutes=1)
+scheduler.add_job(lambda: sync_documents("data/"), "interval", seconds=20)
 scheduler.start()
