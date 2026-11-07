@@ -21,3 +21,5 @@ Codex was given the following instructions:
 - Keep all frontend code strictly within the app/ directory.
 - Do not modify the backend, Docker configuration, or other services.
 - Submit all frontend changes through a dedicated GitHub Pull Request for review.
+
+Available on http://localhost:4200/
