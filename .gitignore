@@ -13,3 +13,6 @@ uv.lock
 
 # Environment variables
 .env
+
+# Other
+commands.txt

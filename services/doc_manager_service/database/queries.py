@@ -4,8 +4,8 @@ from models.document import Document
 def add_document_query(document : Document):
     try:
         cursor.execute(
-            "INSERT INTO documents (id, relative_path, content_hash, size_bytes, file_created_at, file_modified_at, file_accessed_at) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-            (document.id, document.relative_path, document.content_hash, document.size_bytes, document.file_created_at, document.file_modified_at, document.file_accessed_at)
+            "INSERT INTO documents (id, relative_path, file_name, extension, content_hash, size_bytes, file_created_at, file_modified_at, file_accessed_at) VALUES (%s, %s, %s,%s, %s, %s, %s, %s, %s)",
+            (document.id, document.relative_path, document.filename, document.extension, document.content_hash, document.size_bytes, document.file_created_at, document.file_modified_at, document.file_accessed_at)
         )
         connection.commit()
         print("Document added successfully.")
@@ -22,15 +22,17 @@ def get_documents_query() -> list[Document]:
             documents.append(Document(
                 id=row[0],
                 relative_path=row[1],
-                content_hash=row[2],
-                size_bytes=row[3],
-                file_created_at=row[4],
-                file_modified_at=row[5],
-                file_accessed_at=row[6],
-                is_present=row[7],
-                is_parsed=row[8],
-                created_at=row[9],
-                updated_at=row[10]
+                filename=row[2],
+                extension=row[3],
+                content_hash=row[4],
+                size_bytes=row[5],
+                file_created_at=row[6],
+                file_modified_at=row[7],
+                file_accessed_at=row[8],
+                is_present=row[9],
+                is_parsed=row[10],
+                created_at=row[11],
+                updated_at=row[12]
             ))
         return documents
     except Exception as e:
@@ -48,15 +50,17 @@ def get_document_query(document_id: str) -> Document:
             return Document(
                 id=row[0],
                 relative_path=row[1],
-                content_hash=row[2],
-                size_bytes=row[3],
-                file_created_at=row[4],
-                file_modified_at=row[5],
-                file_accessed_at=row[6],
-                is_present=row[7],
-                is_parsed=row[8],
-                created_at=row[9],
-                updated_at=row[10]
+                filename=row[2],
+                extension=row[3],
+                content_hash=row[4],
+                size_bytes=row[5],
+                file_created_at=row[6],
+                file_modified_at=row[7],
+                file_accessed_at=row[8],
+                is_present=row[9],
+                is_parsed=row[10],
+                created_at=row[11],
+                updated_at=row[12]
             )
         return None
     except Exception as e:

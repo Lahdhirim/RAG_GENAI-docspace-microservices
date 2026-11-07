@@ -6,5 +6,5 @@ uv run --package doc_manager_service .\services\doc_manager_service\database\tab
 ```
 
 ```bash
-uv run --package doc-manager-service uvicorn app:app --app-dir services/doc_manager_service --reload --port 8000
+uv run --package doc_manager_service uvicorn app:app --app-dir services/doc_manager_service --reload --port 8000
 ```

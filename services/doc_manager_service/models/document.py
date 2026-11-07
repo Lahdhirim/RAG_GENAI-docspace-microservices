@@ -4,6 +4,8 @@ from datetime import datetime
 class Document(BaseModel):
     id: str
     relative_path: str
+    filename: str
+    extension: str
     content_hash: str
     size_bytes: int
     file_created_at: datetime | None = None

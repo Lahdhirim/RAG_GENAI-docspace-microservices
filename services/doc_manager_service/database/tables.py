@@ -5,6 +5,8 @@ my_table_creation_query = """
 CREATE TABLE IF NOT EXISTS documents (
     id CHAR(64) PRIMARY KEY,
     relative_path VARCHAR(1024) NOT NULL,
+    file_name VARCHAR(255) NOT NULL,
+    extension VARCHAR(10) NOT NULL,
     content_hash CHAR(64) NOT NULL,
 
     size_bytes BIGINT UNSIGNED NOT NULL,

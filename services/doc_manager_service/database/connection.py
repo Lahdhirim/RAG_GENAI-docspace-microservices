@@ -3,8 +3,12 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
+
+env = os.getenv("ENV", "development")
+host = "db" if env == "production" else "localhost"
+print(f"Connecting to database host: {host}")
 connection = mysql.connector.connect(
-    host="db",
+    host=host,
     user="root",
     password=os.getenv("MYSQL_ROOT_PASSWORD"),
     database=os.getenv("MYSQL_DATABASE"),
