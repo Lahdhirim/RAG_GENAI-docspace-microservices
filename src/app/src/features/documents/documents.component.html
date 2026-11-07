@@ -1,0 +1,274 @@
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">DOCUMENT MANAGER</p>
+    <h1>Vos documents, au même endroit<span>.</span></h1>
+    <p class="intro">
+      Explorez votre bibliothèque et suivez les métadonnées de vos documents.
+    </p>
+  </div>
+  <button class="button primary" (click)="load()" [disabled]="loading()">
+    <span aria-hidden="true">↻</span>
+    {{ loading() ? "Chargement…" : "Actualiser" }}
+  </button>
+</section>
+<section class="stats" aria-label="Vue d’ensemble">
+  <article>
+    <span class="stat-icon" aria-hidden="true">▤</span>
+    <div>
+      <p>Total des documents</p>
+      <strong>{{ loaded() ? documents().length : "—" }}</strong
+      ><small>Dans votre bibliothèque</small>
+    </div>
+  </article>
+  <article>
+    <span class="stat-icon green" aria-hidden="true">✓</span>
+    <div>
+      <p>Documents présents</p>
+      <strong>{{ loaded() ? presentCount() : "—" }}</strong
+      ><small>Détectés par le gestionnaire</small>
+    </div>
+  </article>
+  <article>
+    <span class="stat-icon violet" aria-hidden="true">◫</span>
+    <div>
+      <p>Volume documentaire</p>
+      <strong>{{ loaded() ? bytes(totalBytes()) : "—" }}</strong
+      ><small>Taille totale des fichiers référencés</small>
+    </div>
+  </article>
+</section>
+<section
+  class="library"
+  aria-labelledby="library-title"
+  [attr.aria-busy]="loading()"
+>
+  <div class="library-heading">
+    <div>
+      <h2 id="library-title">
+        Bibliothèque documentaire
+        <span class="count">{{ loaded() ? documents().length : "—" }}</span>
+      </h2>
+      <p>
+        Les documents et leurs métadonnées, synchronisés par Document Manager.
+      </p>
+    </div>
+    <span class="read-only">Consultation</span>
+  </div>
+  <div class="filters">
+    <label class="search"
+      ><span aria-hidden="true">⌕</span
+      ><span class="sr-only">Filtrer par nom ou chemin</span
+      ><input
+        type="search"
+        placeholder="Filtrer par nom ou chemin…"
+        [ngModel]="query()"
+        (ngModelChange)="filter('query', $event)" /></label
+    ><label
+      ><span class="sr-only">Présence</span
+      ><select
+        [ngModel]="presence()"
+        (ngModelChange)="filter('presence', $event)"
+      >
+        <option value="all">Toutes les présences</option>
+        <option value="present">Présents</option>
+        <option value="absent">Absents</option>
+      </select></label
+    ><label
+      ><span class="sr-only">Type de fichier</span
+      ><select [ngModel]="type()" (ngModelChange)="filter('type', $event)">
+        <option value="all">Tous les types</option>
+        @for (extension of types(); track extension) {
+          <option [value]="extension">
+            {{ extension || "Sans extension" }}
+          </option>
+        }
+      </select></label
+    ><label
+      ><span class="sr-only">Trier les documents</span
+      ><select [ngModel]="sort()" (ngModelChange)="filter('sort', $event)">
+        <option value="name">Nom : A → Z</option>
+        <option value="modified">Modification récente</option>
+        <option value="size">Taille décroissante</option>
+      </select></label
+    >
+  </div>
+  @if (loading()) {
+    <div class="state" role="status">
+      <span class="loader" aria-hidden="true"></span>
+      <h3>Chargement de la bibliothèque</h3>
+      <p>Récupération des documents…</p>
+    </div>
+  } @else if (error()) {
+    <div class="state error" role="alert">
+      <span class="state-icon" aria-hidden="true">!</span>
+      <h3>Impossible de charger les documents</h3>
+      <p>{{ error() }}</p>
+      <button class="button" (click)="load()">Réessayer</button>
+    </div>
+  } @else if (!documents().length) {
+    <div class="state" role="status">
+      <span class="state-icon" aria-hidden="true">▤</span>
+      <h3>Votre bibliothèque est vide</h3>
+      <p>
+        Les documents apparaîtront ici dès leur référencement par Document
+        Manager.
+      </p>
+    </div>
+  } @else if (!filtered().length) {
+    <div class="state" role="status">
+      <span class="state-icon" aria-hidden="true">⌕</span>
+      <h3>Aucun document ne correspond</h3>
+      <p>Essayez un autre nom, un chemin ou ajustez vos filtres.</p>
+      <button class="button" (click)="reset()">
+        Réinitialiser les filtres
+      </button>
+    </div>
+  } @else {
+    <div class="table-scroll">
+      <table>
+        <caption class="sr-only">
+          Documents référencés et métadonnées
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Nom du document</th>
+            <th scope="col">Type</th>
+            <th scope="col">Taille</th>
+            <th scope="col">Dernière modification</th>
+            <th scope="col">Présence</th>
+            <th scope="col">Parsing</th>
+            <th scope="col"><span class="sr-only">Détails</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (document of visible(); track document.id) {
+            <tr>
+              <td>
+                <div class="file-cell">
+                  <span class="file-icon" aria-hidden="true">▤</span>
+                  <div>
+                    <button class="file-name" (click)="openDetails(document)">
+                      {{ document.filename }}</button
+                    ><span class="file-path" [title]="document.relative_path">{{
+                      document.relative_path
+                    }}</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="extension">{{ document.extension || "—" }}</span>
+              </td>
+              <td class="nowrap">{{ bytes(document.size_bytes) }}</td>
+              <td class="nowrap">{{ date(document.file_modified_at) }}</td>
+              <td>
+                <span class="badge" [class.present]="document.is_present"
+                  ><span aria-hidden="true">●</span>
+                  {{ document.is_present ? "Présent" : "Absent" }}</span
+                >
+              </td>
+              <td>
+                <span class="parse-status">{{
+                  document.is_parsed ? "Analysé" : "Non analysé"
+                }}</span>
+              </td>
+              <td>
+                <button
+                  class="details-button"
+                  (click)="openDetails(document)"
+                  [attr.aria-label]="'Détails de ' + document.filename"
+                >
+                  →
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <footer class="pagination">
+      <span aria-live="polite"
+        >{{ start() }}–{{ end() }} sur {{ filtered().length }} documents</span
+      >
+      <div>
+        <button
+          class="button"
+          (click)="page.set(page() - 1)"
+          [disabled]="page() === 1"
+          aria-label="Page précédente"
+        >
+          ←</button
+        ><span>Page {{ page() }} / {{ pageCount() }}</span
+        ><button
+          class="button"
+          (click)="page.set(page() + 1)"
+          [disabled]="page() >= pageCount()"
+          aria-label="Page suivante"
+        >
+          →
+        </button>
+      </div>
+    </footer>
+  }
+</section>
+<div class="page-note">
+  <span aria-hidden="true">ⓘ</span>
+  <p>
+    Un espace qui évolue avec vos documents.<small
+      >Le parsing, la recherche OpenSearch et l’agent IA seront disponibles
+      progressivement.</small
+    >
+  </p>
+  <span class="updated">{{
+    error()
+      ? "Actualisation en échec"
+      : refreshedAt()
+        ? "Actualisé à " + refreshedAt()
+        : "En attente de données"
+  }}</span>
+</div>
+<dialog #details aria-labelledby="details-title" (close)="selected.set(null)">
+  @if (selected(); as doc) {
+    <div class="dialog-heading">
+      <div>
+        <p class="eyebrow">MÉTADONNÉES</p>
+        <h2 id="details-title">{{ doc.filename }}</h2>
+      </div>
+      <button
+        class="button"
+        (click)="closeDetails()"
+        aria-label="Fermer les détails"
+      >
+        ✕
+      </button>
+    </div>
+    <dl>
+      <dt>Chemin relatif</dt>
+      <dd>{{ doc.relative_path }}</dd>
+      <dt>Identifiant</dt>
+      <dd class="mono">{{ doc.id }}</dd>
+      <dt>Empreinte du contenu</dt>
+      <dd class="mono">{{ doc.content_hash }}</dd>
+      <dt>Type / taille</dt>
+      <dd>
+        {{ doc.extension || "Sans extension" }} · {{ bytes(doc.size_bytes) }}
+      </dd>
+      <dt>Présence</dt>
+      <dd>{{ doc.is_present ? "Présent" : "Absent" }}</dd>
+      <dt>Parsing</dt>
+      <dd>{{ doc.is_parsed ? "Analysé" : "Non analysé" }}</dd>
+      <dt>Création du fichier</dt>
+      <dd>{{ date(doc.file_created_at) }}</dd>
+      <dt>Modification du fichier</dt>
+      <dd>{{ date(doc.file_modified_at) }}</dd>
+      <dt>Dernier accès au fichier</dt>
+      <dd>{{ date(doc.file_accessed_at) }}</dd>
+      <dt>Référencé le</dt>
+      <dd>{{ date(doc.created_at) }}</dd>
+      <dt>Métadonnées mises à jour le</dt>
+      <dd>{{ date(doc.updated_at) }}</dd>
+    </dl>
+    <footer>
+      <button class="button primary" (click)="closeDetails()">Fermer</button>
+    </footer>
+  }
+</dialog>
