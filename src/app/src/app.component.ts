@@ -4,8 +4,8 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from "@angular/router";
   selector: "app-root",
   imports: [RouterLink, RouterLinkActive, RouterOutlet],
   template: `
-    <a class="skip-link" href="#main">Aller au contenu</a>
-    <aside class="sidebar" aria-label="Navigation principale">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <aside class="sidebar" aria-label="Main navigation">
       <a class="brand" routerLink="/documents"
         ><span class="brand-mark">d.</span> docspace<span class="brand-dot"
           >●</span
@@ -13,9 +13,9 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from "@angular/router";
       >
       <div class="workspace">
         <span class="workspace-icon">D</span>
-        <div>Espace documentaire<small>Gestion intelligente</small></div>
+        <div>Document workspace<small>Intelligent management</small></div>
       </div>
-      <p class="nav-label">ESPACE DE TRAVAIL</p>
+      <p class="nav-label">WORKSPACE</p>
       <nav>
         <a
           routerLink="/documents"
@@ -24,27 +24,24 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from "@angular/router";
           ><span aria-hidden="true">▤</span> Documents</a
         >
         @for (item of upcoming; track item.label) {
-          <button
-            disabled
-            [attr.title]="item.label + ' : fonctionnalité à venir'"
-          >
+          <button disabled [attr.title]="item.label + ': coming soon'">
             <span aria-hidden="true">{{ item.icon }}</span
-            >{{ item.label }}<small>À venir</small>
+            >{{ item.label }}<small>Coming soon</small>
           </button>
         }
       </nav>
       <div class="sidebar-footer">
-        <span class="status-dot"></span> Plateforme documentaire<small
-          >Document Manager · Espace de consultation</small
+        <span class="status-dot"></span> Document platform<small
+          >Document Manager · Read-only workspace</small
         >
       </div>
     </aside>
     <div class="main-shell">
       <header class="topbar">
         <span
-          >Espace de travail <span class="breadcrumb">/</span>
+          >Workspace <span class="breadcrumb">/</span>
           <strong>Documents</strong></span
-        ><span class="avatar" aria-label="Espace documentaire">D</span>
+        ><span class="avatar" aria-label="Document workspace">D</span>
       </header>
       <main id="main" tabindex="-1"><router-outlet /></main>
     </div>
@@ -53,7 +50,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from "@angular/router";
 export class AppComponent {
   readonly upcoming = [
     { label: "Parsing", icon: "⇄" },
-    { label: "Recherche OpenSearch", icon: "⌕" },
-    { label: "Agent IA", icon: "✧" },
+    { label: "OpenSearch search", icon: "⌕" },
+    { label: "AI agent", icon: "✧" },
   ];
 }

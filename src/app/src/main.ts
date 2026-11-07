@@ -5,4 +5,4 @@ import { AppComponent } from "./app.component";
 import { routes } from "./app.routes";
 bootstrapApplication(AppComponent, {
   providers: [provideHttpClient(), provideRouter(routes)],
-}).catch((error) => console.error("Impossible de démarrer le frontend", error));
+}).catch((error) => console.error("Unable to start the frontend", error));

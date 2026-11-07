@@ -31,22 +31,25 @@ test("documents, local filters, sorting, pagination, metadata and responsive lay
   });
   await page.goto("/documents");
   await expect(
-    page.getByRole("heading", { name: /Bibliothèque documentaire/ }),
+    page.getByRole("heading", { name: /Document library/ }),
   ).toBeVisible();
   await expect(page.locator("tbody tr")).toHaveCount(10);
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  await expect(page.locator("tbody tr").first()).toContainText("1 KiB");
+  await expect(page.locator("tbody tr").nth(1)).toContainText("Jul 11, 2026");
   await page.screenshot({
     path: testInfo.outputPath("library.png"),
     fullPage: true,
   });
   await expect(page.getByText("Page 1 / 2")).toBeVisible();
-  await page.getByRole("button", { name: "Page suivante" }).click();
+  await page.getByRole("button", { name: "Next page" }).click();
   await expect(page.locator("tbody tr")).toHaveCount(2);
   await page.getByRole("searchbox").fill("Document 12");
   await expect(page.locator("tbody tr")).toHaveCount(1);
   await expect(page.getByText("Page 1 / 1")).toBeVisible();
   await page.getByRole("searchbox").fill("");
   await page
-    .getByRole("combobox", { name: "Présence", exact: true })
+    .getByRole("combobox", { name: "Availability", exact: true })
     .selectOption("absent");
   await expect(page.locator("tbody tr")).toHaveCount(1);
   await page
@@ -59,27 +62,27 @@ test("documents, local filters, sorting, pagination, metadata and responsive lay
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).not.toBeVisible();
   await page
-    .getByRole("combobox", { name: "Présence", exact: true })
+    .getByRole("combobox", { name: "Availability", exact: true })
     .selectOption("all");
   await page
-    .getByRole("combobox", { name: "Type de fichier", exact: true })
+    .getByRole("combobox", { name: "File type", exact: true })
     .selectOption(".txt");
   await expect(page.locator("tbody tr")).toHaveCount(1);
   await page
-    .getByRole("combobox", { name: "Type de fichier", exact: true })
+    .getByRole("combobox", { name: "File type", exact: true })
     .selectOption("all");
   await page
-    .getByRole("combobox", { name: "Trier les documents", exact: true })
+    .getByRole("combobox", { name: "Sort documents", exact: true })
     .selectOption("size");
   await expect(page.locator("tbody tr").first()).toContainText(
     "Document 12.pdf",
   );
   await page.getByRole("searchbox").fill("introuvable");
-  await expect(page.getByText("Aucun document ne correspond")).toBeVisible();
-  await page.getByRole("button", { name: "Réinitialiser les filtres" }).click();
+  await expect(page.getByText("No matching documents")).toBeVisible();
+  await page.getByRole("button", { name: "Reset filters" }).click();
   await expect(page.locator("tbody tr")).toHaveCount(10);
   expect(calls).toEqual(["GET"]);
-  await page.getByRole("button", { name: "Actualiser", exact: true }).click();
+  await page.getByRole("button", { name: "Refresh", exact: true }).click();
   await expect(page.locator("tbody tr")).toHaveCount(10);
   expect(calls).toEqual(["GET", "GET"]);
   await expect(page.getByRole("button", { name: /OpenSearch/ })).toBeDisabled();
@@ -107,11 +110,11 @@ test("loading, HTTP failure and retry to empty state", async ({ page }) => {
     } else await route.fulfill({ json: { documents: [] } });
   });
   await page.goto("/documents");
-  await expect(page.getByText("Chargement de la bibliothèque")).toBeVisible();
+  await expect(page.getByText("Loading your library")).toBeVisible();
   finish();
   await expect(page.getByRole("alert")).toContainText("HTTP 503");
-  await page.getByRole("button", { name: "Réessayer" }).click();
-  await expect(page.getByText("Votre bibliothèque est vide")).toBeVisible();
+  await page.getByRole("button", { name: "Try again" }).click();
+  await expect(page.getByText("Your library is empty")).toBeVisible();
 });
 test("invalid API payload is reported instead of silently showing an empty library", async ({
   page,
@@ -125,6 +128,6 @@ test("invalid API payload is reported instead of silently showing an empty libra
   });
   await page.goto("/documents");
   await expect(page.getByRole("alert")).toContainText(
-    "Le format de la réponse est invalide.",
+    "The response format is invalid.",
   );
 });

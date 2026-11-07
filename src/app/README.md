@@ -1,10 +1,10 @@
-# Docspace — Frontend documentaire
+# Docspace — Document management frontend
 
-Application Angular 21 / TypeScript autonome. **Tout le frontend, sa configuration et ses tests se trouvent dans `src/app/` du dépôt.** Aucun changement du backend ou de l'infrastructure n'est nécessaire au développement du frontend.
+A standalone Angular 21 / TypeScript application. **All frontend source, configuration and tests live inside the repository's `src/app/` directory.** No backend or infrastructure changes are included.
 
-## Démarrage
+## Getting started
 
-Prérequis : Node.js 22.12+ ou 24 et npm.
+Requirements: Node.js 22.12+ or 24 and npm.
 
 ```sh
 cd src/app
@@ -12,55 +12,60 @@ npm ci
 npm start
 ```
 
-Ouvrir http://localhost:4200. Le serveur Angular transmet **uniquement `/documents`** à FastAPI via `proxy.conf.cjs` (cible par défaut : http://127.0.0.1:8000, port publié par le Compose existant). Le service Document Manager et sa base doivent être disponibles ; le frontend ne les démarre pas. Si l'API est sur une autre machine, adapter uniquement la cible du proxy frontend.
+Open http://localhost:4200. The Angular development server proxies **only `/documents`** to FastAPI through `proxy.conf.cjs` (default target: http://127.0.0.1:8000, the port published by the existing Compose configuration). Document Manager and its database must already be running; the frontend does not start them. If the API runs elsewhere, update the frontend proxy target.
 
-L'application appelle exclusivement `GET /documents`. L'URL de navigation `/documents` est également une route Angular : le proxy du serveur de développement distingue une navigation HTML d'une requête HTTP de données. Aucun endpoint de détail, de téléchargement ou de mutation n'est supposé.
+The application calls only `GET /documents`. `/documents` is also an Angular page route: the development proxy distinguishes HTML navigation from API data requests. No detail, download or mutation endpoints are assumed.
 
-## Fonctionnalités
+## Features
 
-- Tableau des noms, chemins, extensions, tailles, dates de modification, présence et état de parsing.
-- Compteurs issus des données de l'API ; taille totale incluant les documents absents référencés.
-- Filtres par nom/chemin, présence et extension, tri par nom, taille ou modification, pagination locale de 10 lignes.
-- Détails de toutes les métadonnées disponibles, sans requête supplémentaire ; dates nulles affichées par `—`.
-- Chargement, bibliothèque vide, filtres sans résultat, erreur HTTP/réseau, réponse invalide, délai de 15 secondes et réessai.
-- Interface responsive, tableau à défilement horizontal sur petits écrans, navigation clavier et dialogue natif (Échap, focus contenu et retour au déclencheur).
-- Rubriques Parsing, Recherche OpenSearch et Agent IA désactivées et marquées « À venir ».
+- Document names, paths, extensions, sizes, modification dates, availability and parsing status.
+- API-derived counters; total storage includes registered documents currently marked absent.
+- Local filters for name/path, availability and extension, sorting by name, size or modification date, and pagination with 10 rows per page.
+- A metadata dialog without additional API requests; null dates display as `—`.
+- Loading, empty library, no matching results, HTTP/network errors, invalid responses, a 15-second timeout and retry.
+- Responsive layout, a horizontally scrollable table on smaller screens, keyboard navigation and a native dialog with Escape support and focus restoration.
+- Parsing, OpenSearch search and AI agent navigation entries disabled and marked “Coming soon”.
 
-Les filtres et le tri opèrent **localement** sur la liste récupérée ; il ne s'agit pas d'une recherche OpenSearch. Les indicateurs de parsing sont uniquement ceux renvoyés par l'API. Une actualisation échouée masque le tableau ; les compteurs précédents restent visibles avec la mention « Actualisation en échec ».
+Filtering and sorting run **locally** on the fetched list; they do not use OpenSearch. Parsing indicators reflect only the API response. A failed refresh hides the table; previous counters remain visible alongside “Refresh failed”. Interface text, accessibility labels, date and number formatting, documentation and PR descriptions use English. File sizes use binary units (B, KiB, MiB and GiB).
 
-## Contrat API
+## API contract
 
-Source consultée : `src/services/doc_manager_service/app.py`, `models/document.py` et `database/queries.py` sur `worker-service`. La réponse est `{ "documents": [...] }`, avec `filename` (et non la colonne SQL `file_name`), `id`, `relative_path`, `extension`, `content_hash`, `size_bytes`, `is_present`, `is_parsed`, `file_created_at`, `file_modified_at`, `file_accessed_at`, `created_at`, `updated_at`. Les cinq dates peuvent être nulles. Les booléens sérialisés par Pydantic sont des booléens JSON.
+Sources inspected on `worker-service`: `src/services/doc_manager_service/app.py`, `models/document.py` and `database/queries.py`. The response is `{ "documents": [...] }`, containing `filename` (rather than the SQL column `file_name`), `id`, `relative_path`, `extension`, `content_hash`, `size_bytes`, `is_present`, `is_parsed`, `file_created_at`, `file_modified_at`, `file_accessed_at`, `created_at` and `updated_at`. All five dates are nullable. Pydantic serializes flags as JSON booleans.
 
-Le service valide la structure de la réponse avant affichage. Aucun jeu de données de démonstration n'est injecté dans l'application.
+The service validates response structure before rendering. The application contains no fallback demo data.
 
 ## Architecture
 
-- `src/core/documents/` : contrat typé, validation et accès HTTP.
-- `src/features/documents/` : écran documentaire chargé à la demande, état via signals et filtres calculés.
-- `src/shared/` : présentation des tailles et des dates.
-- `src/app.component.ts`, `src/app.routes.ts` : coque et navigation. De futures fonctionnalités pourront ajouter leurs propres routes et services sans coupler l'écran documentaire aux microservices.
-- Configuration Angular, TypeScript, proxy et dépendances verrouillées à la racine de ce dossier.
+- `src/core/documents/`: typed contract, validation and HTTP access.
+- `src/features/documents/`: lazy-loaded document screen, signal-based state and computed filters.
+- `src/shared/`: file size and date formatting.
+- `src/app.component.ts`, `src/app.routes.ts`: application shell and navigation. Future features can add independent routes and services without coupling the document screen to other microservices.
+- Angular, TypeScript, proxy configuration and locked dependencies at the root of this directory.
 
-## Compilation et tests
+## Build and tests
 
 ```sh
 npm run build
 npm test
 npx playwright install chromium
 npm run test:e2e
+npm run format:check
 ```
 
-`npm run build` génère `dist/documents/browser/`. Les tests unitaires couvrent le contrat, les réponses invalides, erreurs HTTP et timeout. Les tests Playwright lancent le serveur Angular et interceptent les réponses `GET /documents` : affichage, filtres, tri, pagination, détails, états de chargement/erreur/vide, réessai, nombre et méthode des appels, absence de débordement global et erreurs JavaScript, sur ordinateur et mobile.
+The production build is generated in `dist/documents/browser/`. Unit tests cover the API contract, invalid responses, HTTP errors and timeouts. Playwright starts Angular and intercepts `GET /documents` responses to test rendering, filters, sorting, pagination, metadata, loading/error/empty states, retry, request method/count, JavaScript errors and document overflow on desktop and mobile.
 
-Pour utiliser un Chromium déjà installé :
+To use an existing Chromium installation:
 
 ```sh
 PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:e2e
 ```
 
-Les tests simulés ne remplacent pas une validation d'intégration avec une instance FastAPI et une base actives.
+Mock-based tests do not replace integration testing against a running FastAPI instance and database.
 
-## Hébergement futur
+## Future hosting
 
-Le build utilise une URL relative `/documents`. L'hébergement de production devra transmettre les appels de données `GET /documents` au Document Manager et servir l'entrée Angular pour les navigations HTML, y compris lors d'un accès direct à la route `/documents`. Le proxy Angular est limité au développement et ne fait pas partie du build. Cette configuration de production reste à la charge de l'infrastructure ; aucun Dockerfile ni Compose n'est modifié ici.
+The build uses the relative `/documents` URL. Production hosting must forward API data requests to Document Manager and serve Angular's entry point for HTML navigation, including direct access to `/documents`. The Angular proxy is development-only and is not included in the production build. Production routing remains an infrastructure responsibility; no Dockerfile or Compose files are modified.
+
+## Pull request convention
+
+Write PR titles and descriptions in English. Begin every Codex-generated PR description with a sentence identifying Codex and the model used, for example: “This pull request was generated by Codex using GPT-6.” Use the model actually reported for that session; do not guess a more specific model identifier.

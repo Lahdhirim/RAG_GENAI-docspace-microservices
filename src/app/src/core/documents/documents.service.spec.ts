@@ -10,8 +10,8 @@ import { DocumentsService } from "./documents.service";
 import { DocumentRecord } from "./document.model";
 const document: DocumentRecord = {
   id: "abc",
-  filename: "Rapport.pdf",
-  relative_path: "reports/Rapport.pdf",
+  filename: "Report.pdf",
+  relative_path: "reports/Report.pdf",
   extension: ".pdf",
   content_hash: "def",
   size_bytes: 1024,
@@ -59,9 +59,7 @@ describe("DocumentsService API contract", () => {
   ])("rejects malformed response %j", async (payload) => {
     const result = firstValueFrom(api.list());
     http.expectOne("/documents").flush(payload);
-    await expect(result).rejects.toThrow(
-      "Le format de la réponse est invalide.",
-    );
+    await expect(result).rejects.toThrow("The response format is invalid.");
   });
   it("propagates backend errors", async () => {
     const result = firstValueFrom(api.list());

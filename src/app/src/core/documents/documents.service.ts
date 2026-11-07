@@ -10,7 +10,7 @@ export class DocumentsService {
       timeout(15000),
       map((response) => {
         if (!isDocumentsResponse(response))
-          throw new Error("Le format de la réponse est invalide.");
+          throw new Error("The response format is invalid.");
         return response.documents;
       }),
     );

@@ -47,13 +47,13 @@ export class DocumentsComponent {
     [...new Set(this.documents().map((d) => d.extension))].sort(),
   );
   readonly filtered = computed(() => {
-    const query = this.query().trim().toLocaleLowerCase("fr");
+    const query = this.query().trim().toLocaleLowerCase("en");
     return this.documents()
       .filter(
         (d) =>
           (!query ||
             `${d.filename} ${d.relative_path}`
-              .toLocaleLowerCase("fr")
+              .toLocaleLowerCase("en")
               .includes(query)) &&
           (this.presence() === "all" ||
             d.is_present === (this.presence() === "present")) &&
@@ -69,7 +69,7 @@ export class DocumentsComponent {
             a.id.localeCompare(b.id)
           );
         return (
-          a.filename.localeCompare(b.filename, "fr", { numeric: true }) ||
+          a.filename.localeCompare(b.filename, "en", { numeric: true }) ||
           a.id.localeCompare(b.id)
         );
       });
@@ -107,7 +107,7 @@ export class DocumentsComponent {
           if (this.type() !== "all" && !this.types().includes(this.type()))
             this.type.set("all");
           this.refreshedAt.set(
-            new Intl.DateTimeFormat("fr-FR", { timeStyle: "short" }).format(
+            new Intl.DateTimeFormat("en-US", { timeStyle: "short" }).format(
               new Date(),
             ),
           );
@@ -118,12 +118,12 @@ export class DocumentsComponent {
           this.error.set(
             error instanceof HttpErrorResponse
               ? error.status === 0
-                ? "Le service documentaire est injoignable. Vérifiez sa disponibilité puis réessayez."
-                : `Le service documentaire a renvoyé une erreur (HTTP ${error.status}).`
+                ? "The document service is unreachable. Check its availability and try again."
+                : `The document service returned an error (HTTP ${error.status}).`
               : error instanceof Error &&
-                  error.message === "Le format de la réponse est invalide."
+                  error.message === "The response format is invalid."
                 ? error.message
-                : "Le délai de réponse est dépassé. Réessayez dans un instant.",
+                : "The request timed out. Please try again shortly.",
           );
         },
       });
