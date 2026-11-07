@@ -1,0 +1,10 @@
+.env.example
+.pre-commit-config.yaml
+.ruff_cache/
+.venv/
+commands.txt/
+data/
+LICENSE
+logs/
+README.md
+uv.lock

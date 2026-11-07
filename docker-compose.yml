@@ -43,6 +43,20 @@ services:
       - redis
     env_file: 
       - ./.env
+  doc_manager_worker:
+    build:
+      context: .
+      dockerfile: src/services/doc_manager_service/Dockerfile
+    restart: always
+    environment:
+      - ENV=production
+    command: ["python", "worker.py"]
+    depends_on:
+      - db
+    env_file: 
+      - ./.env
+    volumes:
+      - ./data:/app/data
       
 volumes:
   db-data:

@@ -31,7 +31,9 @@ def scan_documents(directory) -> list[Document]:
     for root, _, files in os.walk(directory):
         for file in files:
             # Relative path
-            relative_path = os.path.relpath(os.path.join(root, file), directory)
+            relative_path = os.path.relpath(
+                os.path.join(root, file), directory
+            ).replace("\\", "/")
 
             # Filename and Extension
             filename, extension = os.path.splitext(file)
