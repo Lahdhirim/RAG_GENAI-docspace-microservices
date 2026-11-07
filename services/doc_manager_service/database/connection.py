@@ -7,7 +7,8 @@ connection = mysql.connector.connect(
     host="db",
     user="root",
     password=os.getenv("MYSQL_ROOT_PASSWORD"),
-    database=os.getenv("MYSQL_DATABASE")
+    database=os.getenv("MYSQL_DATABASE"),
+    autocommit=True
 )
 
 

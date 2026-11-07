@@ -14,9 +14,9 @@ def add_document_query(document : Document):
 
 def get_documents_query() -> list[Document]:
     try:
+        connection.commit()
         cursor.execute("SELECT * FROM documents")
         rows = cursor.fetchall()
-        print(rows)
         documents = []
         for row in rows:
             documents.append(Document(
