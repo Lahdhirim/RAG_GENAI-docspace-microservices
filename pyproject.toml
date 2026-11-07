@@ -4,7 +4,9 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "shared"
+]
 
 [dependency-groups]
 dev = [
@@ -15,6 +17,10 @@ dev = [
 
 [tool.uv.workspace]
 members = [
-    "services/parser_service",
-    "services/doc_manager_service",
+    "src/services/parser_service",
+    "src/services/doc_manager_service",
+    "src/shared"
 ]
+
+[tool.uv.sources]
+shared = { workspace = true }

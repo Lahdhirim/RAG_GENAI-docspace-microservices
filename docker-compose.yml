@@ -30,7 +30,9 @@ services:
       - db
       - redis
   doc_manager_api:
-    build: services/doc_manager_service
+    build:
+      context: .
+      dockerfile: src/services/doc_manager_service/Dockerfile
     restart: always
     environment:
       - ENV=production

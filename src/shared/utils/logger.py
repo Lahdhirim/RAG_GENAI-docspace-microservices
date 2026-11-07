@@ -1,6 +1,7 @@
 import logging
 import os
 
+
 def create_logger(name: str, log_file: str, propagate: bool = True) -> logging.Logger:
     """Create and configure a logger writing to a specific file."""
 

@@ -1,4 +1,4 @@
-from connection import cursor, connection
+from database.connection import connection, cursor
 
 # Create the documents table
 my_table_creation_query = """

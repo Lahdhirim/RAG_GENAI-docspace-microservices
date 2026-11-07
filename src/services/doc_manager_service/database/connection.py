@@ -1,5 +1,6 @@
-import mysql.connector
 import os
+
+import mysql.connector
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -12,7 +13,7 @@ connection = mysql.connector.connect(
     user="root",
     password=os.getenv("MYSQL_ROOT_PASSWORD"),
     database=os.getenv("MYSQL_DATABASE"),
-    autocommit=True
+    autocommit=True,
 )
 
 
