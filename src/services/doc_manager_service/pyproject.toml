@@ -11,4 +11,5 @@ dependencies = [
     "mysql-connector-python>=26.10.0",
     "redis>=8.1.0",
     "uvicorn>=0.54.0",
+    "shared",
 ]

@@ -1,5 +1,4 @@
 services:
-
   redis:
     image: "redis:alpine"
     container_name: redis-service
@@ -30,7 +29,9 @@ services:
       - db
       - redis
   doc_manager_api:
-    build: services/doc_manager_service
+    build:
+      context: .
+      dockerfile: src/services/doc_manager_service/Dockerfile
     restart: always
     environment:
       - ENV=production
@@ -41,6 +42,32 @@ services:
       - redis
     env_file: 
       - ./.env
+  doc_manager_worker:
+    build:
+      context: .
+      dockerfile: src/services/doc_manager_service/Dockerfile
+    restart: always
+    environment:
+      - ENV=production
+    command: ["python", "worker.py"]
+    depends_on:
+      - db
+    env_file: 
+      - ./.env
+    volumes:
+      - ./data:/app/data
+  web_app:
+    build:
+      context: ./src/app
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "4200:4200"
+    environment:
+      - ENV=production
+    depends_on:
+      - db
+      - doc_manager_api
       
 volumes:
   db-data:

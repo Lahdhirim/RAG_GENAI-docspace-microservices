@@ -1,9 +1,10 @@
-from fastapi import FastAPI
-from database.queries import get_documents_query
 import redis
+from database.queries import get_documents_query
+from fastapi import FastAPI
 
 app = FastAPI()
-r = redis.Redis(host='redis', port=6379)
+r = redis.Redis(host="redis", port=6379)
+
 
 @app.get("/")
 def read_root():
@@ -11,9 +12,11 @@ def read_root():
     count = r.incr("hits")
     return {"message": "Hello from doc-manager-service!", "hits": count}
 
-@app.get("/health") 
+
+@app.get("/health")
 def health_check():
     return {"status": "OK"}
+
 
 @app.get("/documents")
 def get_documents():
