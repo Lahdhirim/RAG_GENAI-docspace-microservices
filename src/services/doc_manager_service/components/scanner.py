@@ -214,7 +214,7 @@ def mark_present_documents(
     return present_documents, failed_documents
 
 
-def sync_documents(directory) -> None:
+def sync_documents(directory: str) -> None:
     logger.info("=" * 80)
     logger.info(
         f"[SYNC DOCUMENTS] Starting document synchronization for directory: {directory}"

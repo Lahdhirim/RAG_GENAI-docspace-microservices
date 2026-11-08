@@ -1,10 +1,12 @@
+import logging
+
 from database.connection import connection, cursor
 from models.document import Document
-from utils.logger import create_logger
 
-logger = create_logger("database", "logs/database.log")
+logger = logging.getLogger("database")
 
 
+##################################################### Document Queries ###############################################
 def add_document_query(document: Document) -> tuple[bool, Exception | None]:
     try:
         cursor.execute(
@@ -142,4 +144,39 @@ def get_document_query(document_id: str) -> Document:
         logger.error(
             f"[GET DOCUMENT] Error fetching document: {e}, Document ID: {document_id}"
         )
+        raise
+
+
+##################################################### Jobs Queries ###############################################
+def get_documents_to_parse() -> list[Document]:
+    try:
+        cursor.execute(
+            "SELECT * FROM documents WHERE is_parsed = FALSE AND is_present = TRUE AND content_hash IS NOT NULL and size_bytes > 0"
+        )
+        rows = cursor.fetchall()
+        documents = []
+        for row in rows:
+            documents.append(
+                Document(
+                    id=row[0],
+                    relative_path=row[1],
+                    filename=row[2],
+                    extension=row[3],
+                    content_hash=row[4],
+                    size_bytes=row[5],
+                    file_created_at=row[6],
+                    file_modified_at=row[7],
+                    file_accessed_at=row[8],
+                    is_present=row[9],
+                    is_parsed=row[10],
+                    created_at=row[11],
+                    updated_at=row[12],
+                )
+            )
+        logger.info(
+            f"[GET DOCUMENTS TO PARSE] Fetched {len(documents)} documents to parse."
+        )
+        return documents
+    except Exception as e:
+        logger.error(f"[GET DOCUMENTS TO PARSE] Error fetching documents to parse: {e}")
         raise

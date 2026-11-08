@@ -1,4 +1,8 @@
+import logging
+
 from database.connection import connection, cursor
+
+logger = logging.getLogger("database")
 
 # Create the documents table
 my_table_creation_query = """
@@ -22,12 +26,37 @@ CREATE TABLE IF NOT EXISTS documents (
         ON UPDATE CURRENT_TIMESTAMP
 );
 """
-
 try:
     cursor.execute(my_table_creation_query)
-    print("Table created successfully.")
+    logger.info("[TABLES DOCUMENTS] Table created successfully.")
 except Exception as e:
-    print("Error creating table:", e)
+    logger.error("[TABLES DOCUMENTS] Error creating table: %s", e)
+
+# Create the jobs table
+my_jobs_creation_query = """
+CREATE TABLE IF NOT EXISTS jobs (
+    job_id VARCHAR(64) PRIMARY KEY,
+    document_id CHAR(64) NOT NULL,
+
+    submitted_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('queued', 'processing', 'completed', 'failed')
+        NOT NULL DEFAULT 'queued',
+
+    started_at DATETIME NULL,
+    finished_at DATETIME NULL,
+
+    waiting_duration FLOAT NULL,
+    execution_duration FLOAT NULL,
+
+    FOREIGN KEY (document_id) REFERENCES documents(id)
+);
+"""
+
+try:
+    cursor.execute(my_jobs_creation_query)
+    logger.info("[TABLES JOBS] Table created successfully.")
+except Exception as e:
+    logger.error("[TABLES JOBS] Error creating table: %s", e)
 
 # Close the cursor and connection to the database
 cursor.close()

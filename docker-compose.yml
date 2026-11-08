@@ -16,8 +16,6 @@ services:
       - "3306:3306"
     volumes:
       - db-data:/var/lib/mysql
-    depends_on:
-      - redis
   admin:
     image: phpmyadmin
     restart: always
@@ -27,7 +25,6 @@ services:
       - 8080:80
     depends_on:
       - db
-      - redis
   doc_manager_api:
     build:
       context: .
@@ -39,7 +36,6 @@ services:
       - "8000:8000"
     depends_on:
       - db
-      - redis
     env_file: 
       - ./.env
   doc_manager_worker:

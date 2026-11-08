@@ -1,4 +1,4 @@
-# Intelligent SharePoint
+# Docspace : Document Management Platform
 
 ## Document Manager Service
 
