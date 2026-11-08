@@ -5,7 +5,7 @@ from pathlib import Path
 
 import redis
 from components.parse import parse_document
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from rq import Queue
 from utils.logger import create_logger
@@ -50,6 +50,7 @@ class JobStatus(str, Enum):
     RUNNING = "RUNNING"
     FAILED = "FAILED"
     COMPLETED = "COMPLETED"
+    NOT_STARTED = "NOT_STARTED"
 
 
 class JobResponse(BaseModel):
@@ -68,7 +69,7 @@ class JobResponse(BaseModel):
 @app.post("/submit")
 def submit_parsing_job(job_data: JobData) -> JobResponse:
     logger.info(
-        "[PARSER SERVICE] Received parsing job for document %s with ID %s with relative_path: %s",
+        "[PARSER SERVICE SUBMIT JOB] Received parsing job for document %s with ID %s with relative_path: %s",
         job_data.filename,
         job_data.document_id,
         job_data.relative_path,
@@ -78,7 +79,7 @@ def submit_parsing_job(job_data: JobData) -> JobResponse:
     # Check that the document exists
     if not os.path.exists(document_path):
         logger.error(
-            "[PARSER SERVICE] Document %s with ID %s does not exist at path: %s",
+            "[PARSER SERVICE SUBMIT JOB] Document %s with ID %s does not exist at path: %s",
             job_data.filename,
             job_data.document_id,
             document_path,
@@ -91,9 +92,16 @@ def submit_parsing_job(job_data: JobData) -> JobResponse:
             status=JobStatus.NOT_FOUND,
         )
 
-    job = jobs_queue.enqueue(parse_document, str(document_path))
+    job = jobs_queue.enqueue(
+        parse_document,
+        str(document_path),
+        meta={
+            "document_id": job_data.document_id,
+            "filename": job_data.filename,
+        },
+    )
     logger.info(
-        "[PARSER SERVICE] Enqueued parsing job %s for document %s with ID %s at path: %s",
+        "[PARSER SERVICE SUBMIT JOB] Enqueued parsing job %s for document %s with ID %s at path: %s",
         job.id,
         job_data.filename,
         job_data.document_id,
@@ -106,4 +114,59 @@ def submit_parsing_job(job_data: JobData) -> JobResponse:
         document_path=str(document_path),
         submitted_at=datetime.now(),
         status=JobStatus.QUEUED,
+    )
+
+
+@app.get("/job_status/{job_id}")
+def get_job_status(job_id: str) -> JobResponse:
+
+    # Fetch the job from the queue
+    job = jobs_queue.fetch_job(job_id)
+
+    # Job not found in the queue
+    if not job:
+        logger.warning(
+            "[PARSER SERVICE GET JOB STATUS] Job with ID %s not found in the queue.",
+            job_id,
+        )
+        raise HTTPException(status_code=404, detail=f"Job with ID {job_id} not found")
+
+    # Get job status
+    rq_status = job.get_status(refresh=True)
+    status_mapping = {
+        "queued": JobStatus.QUEUED,
+        "deferred": JobStatus.QUEUED,
+        "scheduled": JobStatus.QUEUED,
+        "started": JobStatus.RUNNING,
+        "finished": JobStatus.COMPLETED,
+        "failed": JobStatus.FAILED,
+        "stopped": JobStatus.FAILED,
+        "canceled": JobStatus.FAILED,
+    }
+    job_status = status_mapping.get(rq_status, JobStatus.NOT_STARTED)
+
+    # Compute job duration
+    submitted_at = job.enqueued_at
+    started_at = job.started_at
+    finished_at = job.ended_at
+    waiting_duration = None
+    execution_duration = None
+
+    if submitted_at and started_at:
+        waiting_duration = (started_at - submitted_at).total_seconds()
+
+    if started_at and finished_at:
+        execution_duration = (finished_at - started_at).total_seconds()
+
+    return JobResponse(
+        job_id=job.id,
+        document_id=job.meta.get("document_id"),
+        filename=job.meta.get("filename"),
+        document_path=str(job.args[0]),
+        submitted_at=submitted_at,
+        status=job_status,
+        started_at=started_at,
+        finished_at=finished_at,
+        waiting_duration=waiting_duration,
+        execution_duration=execution_duration,
     )

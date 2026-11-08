@@ -39,14 +39,16 @@ CREATE TABLE IF NOT EXISTS jobs (
     document_id CHAR(64) NOT NULL,
 
     submitted_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('queued', 'processing', 'completed', 'failed')
-        NOT NULL DEFAULT 'queued',
+    status ENUM('QUEUED', 'NOT_FOUND', 'RUNNING', 'COMPLETED', 'FAILED', 'NOT_STARTED')
+        NOT NULL DEFAULT 'NOT_STARTED',
 
     started_at DATETIME NULL,
     finished_at DATETIME NULL,
 
     waiting_duration FLOAT NULL,
     execution_duration FLOAT NULL,
+
+    error TEXT NULL,
 
     FOREIGN KEY (document_id) REFERENCES documents(id)
 );

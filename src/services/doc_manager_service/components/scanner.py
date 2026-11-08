@@ -82,8 +82,9 @@ def insert_new_documents(
             logger.info(
                 f"[INSERT NEW DOCUMENTS] Inserting new document {local_doc.filename} in {local_doc.relative_path} with ID: {local_doc_id}"
             )
-            status, error = add_document_query(local_doc)
-            if status:
+
+            try:
+                add_document_query(local_doc)
                 added_documents[local_doc_id] = {
                     "filename": local_doc.filename,
                     "relative_path": local_doc.relative_path,
@@ -92,14 +93,15 @@ def insert_new_documents(
                 logger.info(
                     f"[INSERT NEW DOCUMENTS] Document {local_doc.filename} in {local_doc.relative_path} with ID: {local_doc_id} added successfully"
                 )
-            else:
+
+            except Exception as e:
                 logger.error(
-                    f"[INSERT NEW DOCUMENTS] Failed to add document {local_doc.filename} in {local_doc.relative_path} with ID: {local_doc_id}, Error: {error}"
+                    f"[INSERT NEW DOCUMENTS] Failed to add document {local_doc.filename} in {local_doc.relative_path} with ID: {local_doc_id}, Error: {e}"
                 )
                 failed_documents[local_doc_id] = {
                     "filename": local_doc.filename,
                     "relative_path": local_doc.relative_path,
-                    "error": error,
+                    "error": e,
                 }
 
     logger.info(
@@ -125,9 +127,13 @@ def mark_deleted_documents(
             logger.info(
                 f"[MARK DOCUMENT AS DELETED] Marking document {db_document.filename} in {db_document.relative_path} with ID: {db_document_id} as absent"
             )
-            status, error = mark_document_as_deleted_query(document_id=db_document_id)
-            if status:
+
+            try:
+                mark_document_as_deleted_query(document_id=db_document_id)
+
+                # Get the updated document from the database
                 new_doc = get_document_query(db_document_id)
+
                 marked_documents[db_document_id] = {
                     "filename": db_document.filename,
                     "relative_path": db_document.relative_path,
@@ -139,7 +145,8 @@ def mark_deleted_documents(
                 logger.info(
                     f"[MARK DOCUMENT AS DELETED] Document {db_document.filename} in {db_document.relative_path} with ID: {db_document_id} marked as absent successfully"
                 )
-            else:
+
+            except Exception as error:
                 logger.error(
                     f"[MARK DOCUMENT AS DELETED] Failed to mark document {db_document.filename} in {db_document.relative_path} with ID: {db_document_id} as absent, Error: {error}"
                 )
@@ -176,9 +183,10 @@ def mark_present_documents(
                 f"[MARK PRESENT DOCUMENTS] Restoring document {db_document.filename} in {db_document.relative_path} with ID: {db_document_id}"
             )
 
-            status, error = mark_document_as_present_query(document_id=db_document_id)
+            try:
+                mark_document_as_present_query(document_id=db_document_id)
 
-            if status:
+                # Get the updated document from the database
                 new_doc = get_document_query(db_document_id)
 
                 present_documents[db_document_id] = {
@@ -193,7 +201,8 @@ def mark_present_documents(
                 logger.info(
                     f"[MARK PRESENT DOCUMENTS] Document {db_document.filename} in {db_document.relative_path} with ID: {db_document_id} restored successfully"
                 )
-            else:
+
+            except Exception as error:
                 logger.error(
                     f"[MARK PRESENT DOCUMENTS] Failed to restore document {db_document.filename} in {db_document.relative_path} with ID: {db_document_id}, Error: {error}"
                 )
