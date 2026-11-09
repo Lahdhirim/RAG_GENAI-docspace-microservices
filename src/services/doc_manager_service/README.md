@@ -21,3 +21,15 @@ python -m unittest discover -s src/services/doc_manager_service/tests -v
 ```
 
 Run from the repository root. The tests exercise the actual query mapping and FastAPI response serialization with a mocked SQL connection. They cover all enum statuses, datetime/null/zero values, missing joined metadata, parameterized filtering, input validation, database errors, read-only routes and the existing document response. They do not require or validate a live MySQL or Redis instance.
+
+## Document previews
+
+`GET /documents/{document_id}/preview` looks up the document through Document Manager and returns its bytes inline only when it is marked present and its file exists under the document directory. Missing, absent or inaccessible files return HTTP 404 with `This document is currently unavailable.` No SQL writes or parser calls are made.
+
+The root defaults to the repository's `data/` directory (`/app/data` in the existing container layout), independently of the process working directory. Set `DOCUMENTS_ROOT` to use another directory. Absolute paths, parent traversal and symlinks resolving outside that root are rejected. The filename comes from the resolved file; responses use `no-store` and `nosniff` headers.
+
+Supported previews: PDF; PNG, JPEG, GIF, WebP and BMP images; TXT, MD, CSV, JSON, LOG and XML as plain text. HTML, SVG and other formats return HTTP 415. Files larger than 50 MiB return HTTP 413. Text is rendered as text, not HTML, by the frontend.
+
+**Deployment requirement:** the API process must have read access to the same current document files as the scanner. The current Compose file mounts `data/` into the worker and Parser Service, but not `doc_manager_api`, and the Docker build excludes `data/`. Therefore container preview needs an API-side read-only mount or equivalent file access supplied by infrastructure. This change does not modify Compose or Dockerfiles. Until files are accessible to the API, the UI displays the unavailable message even if SQL's last presence flag is true.
+
+Preview tests use temporary real files with the SQL document lookup mocked. They cover file bytes, media types, absent/missing files, root/path boundaries, unsupported types and size limits.

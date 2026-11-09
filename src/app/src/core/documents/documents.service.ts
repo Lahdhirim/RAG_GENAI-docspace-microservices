@@ -5,6 +5,13 @@ import { isDocumentsResponse } from "./document.model";
 @Injectable({ providedIn: "root" })
 export class DocumentsService {
   private readonly http = inject(HttpClient);
+  preview(documentId: string) {
+    return this.http
+      .get(`/documents/${encodeURIComponent(documentId)}/preview`, {
+        responseType: "blob",
+      })
+      .pipe(timeout(30000));
+  }
   list() {
     return this.http.get<unknown>("/documents").pipe(
       timeout(15000),

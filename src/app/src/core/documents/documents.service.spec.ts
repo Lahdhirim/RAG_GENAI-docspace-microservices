@@ -45,6 +45,14 @@ describe("DocumentsService API contract", () => {
     request.flush({ documents: [document] });
     await expect(result).resolves.toEqual([document]);
   });
+  it("fetches preview bytes by an encoded document ID", async () => {
+    const result = firstValueFrom(api.preview("doc & 1"));
+    const request = http.expectOne("/documents/doc%20%26%201/preview");
+    expect(request.request.method).toBe("GET");
+    expect(request.request.responseType).toBe("blob");
+    request.flush(new Blob(["content"], { type: "text/plain" }));
+    await expect(result).resolves.toBeInstanceOf(Blob);
+  });
   it("accepts an empty library", async () => {
     const result = firstValueFrom(api.list());
     http.expectOne("/documents").flush({ documents: [] });

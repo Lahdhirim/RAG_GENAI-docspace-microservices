@@ -16,5 +16,6 @@ module.exports = {
       return undefined;
     },
   },
+  "/documents/*/preview": apiProxy,
   "/jobs": apiProxy,
 };

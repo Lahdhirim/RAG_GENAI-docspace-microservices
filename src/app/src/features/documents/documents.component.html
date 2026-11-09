@@ -143,6 +143,7 @@
             <th scope="col">Availability</th>
             <th scope="col">Submission</th>
             <th scope="col">Parsing</th>
+            <th scope="col">Preview</th>
             <th scope="col"><span class="sr-only">Details</span></th>
           </tr>
         </thead>
@@ -181,6 +182,15 @@
                 <span class="parse-status">{{
                   document.is_parsed ? "Parsed" : "Not parsed"
                 }}</span>
+              </td>
+              <td>
+                <button
+                  class="button"
+                  (click)="openPreview(document)"
+                  [attr.aria-label]="'Preview ' + document.filename"
+                >
+                  Preview
+                </button>
               </td>
               <td>
                 <button
@@ -281,6 +291,9 @@
       <dd>{{ date(doc.updated_at) }}</dd>
     </dl>
     <footer class="document-actions">
+      <button class="button primary" (click)="openPreview(doc)">
+        Preview document
+      </button>
       <a
         class="button"
         routerLink="/parsing"
@@ -291,3 +304,10 @@
     </footer>
   }
 </dialog>
+
+@if (previewDocument(); as document) {
+  <app-document-preview
+    [document]="document"
+    (closed)="previewDocument.set(null)"
+  />
+}

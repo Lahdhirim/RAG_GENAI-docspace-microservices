@@ -9,6 +9,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { HttpErrorResponse } from "@angular/common/http";
+import { DocumentPreviewComponent } from "./document-preview.component";
 import { RouterLink } from "@angular/router";
 import { statusLabel } from "../../core/jobs/job.model";
 import { FormsModule } from "@angular/forms";
@@ -17,7 +18,7 @@ import { DocumentRecord } from "../../core/documents/document.model";
 import { formatBytes, formatDate } from "../../shared/format";
 @Component({
   selector: "app-documents",
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, DocumentPreviewComponent],
   templateUrl: "./documents.component.html",
   styleUrls: ["../../shared/workspace.css", "./documents.component.css"],
 })
@@ -37,6 +38,7 @@ export class DocumentsComponent {
   readonly sort = signal("name");
   readonly page = signal(1);
   readonly pageSize = 10;
+  readonly previewDocument = signal<DocumentRecord | null>(null);
   readonly selected = signal<DocumentRecord | null>(null);
   readonly dialog = viewChild<ElementRef<HTMLDialogElement>>("details");
   readonly bytes = formatBytes;
@@ -147,6 +149,10 @@ export class DocumentsComponent {
     this.type.set("all");
     this.submission.set("all");
     this.page.set(1);
+  }
+  openPreview(document: DocumentRecord): void {
+    this.closeDetails();
+    this.previewDocument.set(document);
   }
   openDetails(document: DocumentRecord): void {
     this.selected.set(document);
