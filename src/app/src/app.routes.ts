@@ -7,6 +7,11 @@ export const routes: Routes = [
         (m) => m.DocumentsComponent,
       ),
   },
+  {
+    path: "parsing",
+    loadComponent: () =>
+      import("./features/jobs/jobs.component").then((m) => m.JobsComponent),
+  },
   { path: "", pathMatch: "full", redirectTo: "documents" },
   { path: "**", redirectTo: "documents" },
 ];

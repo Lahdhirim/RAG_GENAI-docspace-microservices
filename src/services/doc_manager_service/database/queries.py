@@ -316,3 +316,40 @@ def update_document_submission_status(
         )
         connection.rollback()
         raise
+
+
+def get_parsing_jobs_query(document_id: str | None = None) -> list[dict]:
+    """Read SQL job history with document metadata; never contact the parser."""
+    columns = (
+        "job_id",
+        "document_id",
+        "submitted_at",
+        "status",
+        "started_at",
+        "finished_at",
+        "waiting_duration",
+        "execution_duration",
+        "error",
+        "filename",
+        "relative_path",
+    )
+    sql = """
+        SELECT j.job_id, j.document_id, j.submitted_at, j.status,
+               j.started_at, j.finished_at, j.waiting_duration,
+               j.execution_duration, j.error,
+               d.file_name AS filename, d.relative_path
+        FROM jobs AS j
+        LEFT JOIN documents AS d ON d.id = j.document_id
+    """
+    parameters = ()
+    if document_id is not None:
+        sql += " WHERE j.document_id = %s"
+        parameters = (document_id,)
+    sql += " ORDER BY j.submitted_at DESC, j.job_id DESC"
+    try:
+        cursor.execute(sql, parameters)
+        return [dict(zip(columns, row)) for row in cursor.fetchall()]
+    except Exception:
+        logger.exception("[GET PARSING JOBS] Failed to read job history")
+        connection.rollback()
+        raise

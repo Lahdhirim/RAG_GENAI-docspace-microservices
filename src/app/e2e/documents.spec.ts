@@ -7,6 +7,7 @@ const records = Array.from({ length: 12 }, (_, i) => ({
   content_hash: "a".repeat(64),
   size_bytes: (i + 1) * 1024,
   is_present: i !== 11,
+  submission_status: "SUBMITTED",
   is_parsed: i === 0,
   file_created_at: null,
   file_modified_at: i ? "2026-07-11T12:00:00" : null,

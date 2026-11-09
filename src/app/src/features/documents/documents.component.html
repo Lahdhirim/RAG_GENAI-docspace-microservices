@@ -89,6 +89,18 @@
         <option value="size">Largest first</option>
       </select></label
     >
+    <label
+      ><span class="sr-only">Submission status</span
+      ><select
+        [ngModel]="submission()"
+        (ngModelChange)="filter('submission', $event)"
+      >
+        <option value="all">All submissions</option>
+        <option value="NOT_SUBMITTED">Not submitted</option>
+        <option value="SUBMITTED">Submitted</option>
+        <option value="FAILED">Failed</option>
+      </select></label
+    >
   </div>
   @if (loading()) {
     <div class="state" role="status">
@@ -129,6 +141,7 @@
             <th scope="col">Size</th>
             <th scope="col">Last modified</th>
             <th scope="col">Availability</th>
+            <th scope="col">Submission</th>
             <th scope="col">Parsing</th>
             <th scope="col"><span class="sr-only">Details</span></th>
           </tr>
@@ -158,6 +171,11 @@
                   ><span aria-hidden="true">●</span>
                   {{ document.is_present ? "Present" : "Absent" }}</span
                 >
+              </td>
+              <td>
+                <span class="badge">{{
+                  label(document.submission_status)
+                }}</span>
               </td>
               <td>
                 <span class="parse-status">{{
@@ -207,8 +225,8 @@
   <span aria-hidden="true">ⓘ</span>
   <p>
     A workspace that grows with your documents.<small
-      >Parsing, OpenSearch search and the AI agent are coming in future
-      updates.</small
+      >Monitor recorded jobs in Parsing. OpenSearch search and the AI agent are
+      coming in future updates.</small
     >
   </p>
   <span class="updated">{{
@@ -247,6 +265,8 @@
       </dd>
       <dt>Availability</dt>
       <dd>{{ doc.is_present ? "Present" : "Absent" }}</dd>
+      <dt>Submission</dt>
+      <dd>{{ label(doc.submission_status) }}</dd>
       <dt>Parsing</dt>
       <dd>{{ doc.is_parsed ? "Parsed" : "Not parsed" }}</dd>
       <dt>File created</dt>
@@ -260,7 +280,13 @@
       <dt>Metadata updated</dt>
       <dd>{{ date(doc.updated_at) }}</dd>
     </dl>
-    <footer>
+    <footer class="document-actions">
+      <a
+        class="button"
+        routerLink="/parsing"
+        [queryParams]="{ document: doc.id }"
+        >View parsing jobs</a
+      >
       <button class="button primary" (click)="closeDetails()">Close</button>
     </footer>
   }

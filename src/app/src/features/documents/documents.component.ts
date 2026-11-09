@@ -9,15 +9,17 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { HttpErrorResponse } from "@angular/common/http";
+import { RouterLink } from "@angular/router";
+import { statusLabel } from "../../core/jobs/job.model";
 import { FormsModule } from "@angular/forms";
 import { DocumentsService } from "../../core/documents/documents.service";
 import { DocumentRecord } from "../../core/documents/document.model";
 import { formatBytes, formatDate } from "../../shared/format";
 @Component({
   selector: "app-documents",
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: "./documents.component.html",
-  styleUrl: "./documents.component.css",
+  styleUrls: ["../../shared/workspace.css", "./documents.component.css"],
 })
 export class DocumentsComponent {
   private readonly api = inject(DocumentsService);
@@ -29,6 +31,8 @@ export class DocumentsComponent {
   readonly refreshedAt = signal<string | null>(null);
   readonly query = signal("");
   readonly presence = signal("all");
+  readonly submission = signal("all");
+  readonly label = statusLabel;
   readonly type = signal("all");
   readonly sort = signal("name");
   readonly page = signal(1);
@@ -57,7 +61,9 @@ export class DocumentsComponent {
               .includes(query)) &&
           (this.presence() === "all" ||
             d.is_present === (this.presence() === "present")) &&
-          (this.type() === "all" || d.extension === this.type()),
+          (this.type() === "all" || d.extension === this.type()) &&
+          (this.submission() === "all" ||
+            d.submission_status === this.submission()),
       )
       .sort((a, b) => {
         if (this.sort() === "size")
@@ -128,7 +134,10 @@ export class DocumentsComponent {
         },
       });
   }
-  filter(field: "query" | "presence" | "type" | "sort", value: string): void {
+  filter(
+    field: "query" | "presence" | "type" | "sort" | "submission",
+    value: string,
+  ): void {
     this[field].set(value);
     this.page.set(1);
   }
@@ -136,6 +145,7 @@ export class DocumentsComponent {
     this.query.set("");
     this.presence.set("all");
     this.type.set("all");
+    this.submission.set("all");
     this.page.set(1);
   }
   openDetails(document: DocumentRecord): void {

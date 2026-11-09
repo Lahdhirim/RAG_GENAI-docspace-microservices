@@ -16,6 +16,7 @@ const document: DocumentRecord = {
   content_hash: "def",
   size_bytes: 1024,
   is_present: false,
+  submission_status: "SUBMITTED",
   is_parsed: true,
   file_created_at: null,
   file_modified_at: "2026-07-11T12:00:00",
