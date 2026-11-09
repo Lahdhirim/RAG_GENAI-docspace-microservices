@@ -1,8 +1,9 @@
+from apscheduler.executors.pool import ThreadPoolExecutor
 from apscheduler.schedulers.blocking import BlockingScheduler
 from components.parsing_manager import manage_parsing_jobs
 from components.scanner import sync_documents
 
-scheduler = BlockingScheduler()
+scheduler = BlockingScheduler(executors={"default": ThreadPoolExecutor(max_workers=1)})
 
 # Periodically scan documents and synchronize them with the database
 scheduler.add_job(lambda: sync_documents("/app/data"), "interval", seconds=20)

@@ -19,6 +19,8 @@ CREATE TABLE IF NOT EXISTS documents (
     file_accessed_at DATETIME NULL,
 
     is_present BOOLEAN NOT NULL DEFAULT TRUE,
+    submission_status ENUM('NOT_SUBMITTED', 'SUBMITTED', 'FAILED')
+        NOT NULL DEFAULT 'NOT_SUBMITTED',
     is_parsed BOOLEAN NOT NULL DEFAULT FALSE,
 
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -31,6 +33,7 @@ try:
     logger.info("[TABLES DOCUMENTS] Table created successfully.")
 except Exception as e:
     logger.error("[TABLES DOCUMENTS] Error creating table: %s", e)
+    raise e
 
 # Create the jobs table
 my_jobs_creation_query = """
@@ -39,7 +42,7 @@ CREATE TABLE IF NOT EXISTS jobs (
     document_id CHAR(64) NOT NULL,
 
     submitted_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('QUEUED', 'NOT_FOUND', 'RUNNING', 'COMPLETED', 'FAILED', 'NOT_STARTED')
+    status ENUM('QUEUED', 'NOT_FOUND', 'RUNNING', 'COMPLETED', 'FAILED', 'NOT_STARTED', 'UNKNOWN')
         NOT NULL DEFAULT 'NOT_STARTED',
 
     started_at DATETIME NULL,
@@ -59,6 +62,7 @@ try:
     logger.info("[TABLES JOBS] Table created successfully.")
 except Exception as e:
     logger.error("[TABLES JOBS] Error creating table: %s", e)
+    raise e
 
 # Close the cursor and connection to the database
 cursor.close()

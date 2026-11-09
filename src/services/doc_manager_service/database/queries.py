@@ -100,9 +100,10 @@ def get_documents_query() -> list[Document]:
                     file_modified_at=row[7],
                     file_accessed_at=row[8],
                     is_present=row[9],
-                    is_parsed=row[10],
-                    created_at=row[11],
-                    updated_at=row[12],
+                    submission_status=row[10],
+                    is_parsed=row[11],
+                    created_at=row[12],
+                    updated_at=row[13],
                 )
             )
         logger.info(f"[GET DOCUMENTS] Fetched {len(documents)} documents.")
@@ -130,9 +131,10 @@ def get_document_query(document_id: str) -> Document:
                 file_modified_at=row[7],
                 file_accessed_at=row[8],
                 is_present=row[9],
-                is_parsed=row[10],
-                created_at=row[11],
-                updated_at=row[12],
+                submission_status=row[10],
+                is_parsed=row[11],
+                created_at=row[12],
+                updated_at=row[13],
             )
 
         logger.info(f"[GET DOCUMENT] No document found with ID: {document_id}")
@@ -150,7 +152,7 @@ def get_document_query(document_id: str) -> Document:
 def get_active_parsing_jobs() -> list[dict]:
     try:
         cursor.execute(
-            "SELECT job_id, document_id, status FROM jobs WHERE status IN ('QUEUED', 'RUNNING')"
+            "SELECT job_id, document_id, status FROM jobs WHERE status IN ('QUEUED', 'RUNNING', 'UNKNOWN')"
         )
         rows = cursor.fetchall()
         jobs = []
@@ -175,54 +177,39 @@ def get_active_parsing_jobs() -> list[dict]:
         raise
 
 
-def update_jobs_status(job_updates: dict[str, dict]) -> None:
+def update_job_status(job_id: str, job_data: dict) -> bool:
     try:
-        updated_count = 0
-
-        for job_id, job_data in job_updates.items():
-            status = job_data.get("status")
-            if status not in {"QUEUED", "RUNNING", "COMPLETED", "FAILED"}:
-                logger.warning(
-                    "[UPDATE JOBS STATUS] Skipping job %s with status %s",
-                    job_id,
-                    status,
-                )
-                continue
-
-            cursor.execute(
-                """
-                UPDATE jobs
-                SET
-                    status = %s,
-                    started_at = COALESCE(%s, started_at),
-                    finished_at = COALESCE(%s, finished_at),
-                    waiting_duration = COALESCE(%s, waiting_duration),
-                    execution_duration = COALESCE(%s, execution_duration)
-                WHERE job_id = %s
-                  AND status IN ('QUEUED', 'RUNNING')
-                """,
-                (
-                    status,
-                    job_data.get("started_at"),
-                    job_data.get("finished_at"),
-                    job_data.get("waiting_duration"),
-                    job_data.get("execution_duration"),
-                    job_id,
-                ),
-            )
-
-            if cursor.rowcount > 0:
-                updated_count += 1
-
-        connection.commit()
-
-        logger.info(
-            "[UPDATE JOBS STATUS] Successfully updated %d jobs.",
-            updated_count,
+        cursor.execute(
+            """
+            UPDATE jobs
+            SET
+                status = %s,
+                started_at = COALESCE(%s, started_at),
+                finished_at = COALESCE(%s, finished_at),
+                waiting_duration = COALESCE(%s, waiting_duration),
+                execution_duration = COALESCE(%s, execution_duration)
+            WHERE job_id = %s
+              AND status IN ('QUEUED', 'RUNNING', 'UNKNOWN')
+            """,
+            (
+                job_data["status"],
+                job_data.get("started_at"),
+                job_data.get("finished_at"),
+                job_data.get("waiting_duration"),
+                job_data.get("execution_duration"),
+                job_id,
+            ),
         )
 
-    except Exception as e:
-        logger.error(f"[UPDATE JOBS STATUS] Error updating jobs status: {e}")
+        updated = cursor.rowcount > 0
+        connection.commit()
+        return updated
+
+    except Exception:
+        logger.exception(
+            "[UPDATE JOB STATUS] Error updating job %s",
+            job_id,
+        )
         connection.rollback()
         raise
 
@@ -233,6 +220,7 @@ def get_documents_to_parse() -> list[Document]:
                 SELECT *
                 FROM documents
                 WHERE is_parsed = FALSE
+                AND submission_status = 'NOT_SUBMITTED'
                 AND is_present = TRUE
                 AND content_hash IS NOT NULL
                 AND size_bytes > 0
@@ -257,9 +245,10 @@ def get_documents_to_parse() -> list[Document]:
                     file_modified_at=row[7],
                     file_accessed_at=row[8],
                     is_present=row[9],
-                    is_parsed=row[10],
-                    created_at=row[11],
-                    updated_at=row[12],
+                    submission_status=row[10],
+                    is_parsed=row[11],
+                    created_at=row[12],
+                    updated_at=row[13],
                 )
             )
         logger.info(
@@ -269,5 +258,61 @@ def get_documents_to_parse() -> list[Document]:
 
     except Exception as e:
         logger.error(f"[GET DOCUMENTS TO PARSE] Error fetching documents to parse: {e}")
+        connection.rollback()
+        raise
+
+
+def insert_parsing_job(job_data: dict) -> None:
+    try:
+        cursor.execute(
+            """
+            INSERT INTO jobs (
+                job_id,
+                document_id,
+                submitted_at,
+                status
+            )
+            VALUES (%s, %s, %s, %s)
+            """,
+            (
+                job_data["job_id"],
+                job_data["document_id"],
+                job_data["submitted_at"],
+                job_data["status"],
+            ),
+        )
+        connection.commit()
+        logger.info(
+            f"[INSERT PARSING JOB] Successfully inserted parsing job: {job_data}"
+        )
+
+    except Exception:
+        logger.error(f"[INSERT PARSING JOB] Error inserting parsing job: {job_data}")
+        connection.rollback()
+        raise
+
+
+def update_document_submission_status(
+    document_id: str,
+    submission_status: str,
+) -> None:
+    try:
+        cursor.execute(
+            """
+            UPDATE documents
+            SET submission_status = %s
+            WHERE id = %s
+            """,
+            (submission_status, document_id),
+        )
+        connection.commit()
+        logger.info(
+            f"[UPDATE DOCUMENT SUBMISSION STATUS] Successfully updated submission status for document: {document_id}"
+        )
+
+    except Exception:
+        logger.error(
+            f"[UPDATE DOCUMENT SUBMISSION STATUS] Error updating submission status for document: {document_id}"
+        )
         connection.rollback()
         raise

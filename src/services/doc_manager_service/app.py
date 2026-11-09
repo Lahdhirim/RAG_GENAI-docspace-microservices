@@ -1,7 +1,10 @@
+from threading import Lock
+
 from database.queries import get_documents_query
 from fastapi import FastAPI
 
 app = FastAPI()
+database_lock = Lock()
 
 
 @app.get("/")
@@ -16,5 +19,6 @@ def health_check():
 
 @app.get("/documents")
 def get_documents():
-    documents = get_documents_query()
+    with database_lock:
+        documents = get_documents_query()
     return {"documents": documents}
