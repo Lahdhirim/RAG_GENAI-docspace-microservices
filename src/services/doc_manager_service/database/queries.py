@@ -345,7 +345,8 @@ def get_parsing_statuses_query() -> list[tuple]:
                 j.finished_at,
                 j.waiting_duration,
                 j.execution_duration,
-                j.error
+                j.error,
+                j.silver_relative_path
             FROM jobs j
             JOIN documents d ON d.id = j.document_id
             ORDER BY j.submitted_at DESC
@@ -384,5 +385,27 @@ def update_is_parsed_status() -> None:
 
     except Exception as e:
         logger.error(f"[UPDATE IS PARSED STATUS] Error updating documents: {e}")
+        connection.rollback()
+        raise
+
+
+def get_markdown_path_query(document_id: str, job_id: str | None = None) -> str | None:
+    """Resolve a completed job's Markdown path without exposing arbitrary files."""
+    sql = """
+        SELECT silver_relative_path FROM jobs
+        WHERE document_id = %s AND status = 'COMPLETED'
+          AND silver_relative_path IS NOT NULL
+    """
+    parameters = [document_id]
+    if job_id is not None:
+        sql += " AND job_id = %s"
+        parameters.append(job_id)
+    sql += " ORDER BY submitted_at DESC, job_id DESC LIMIT 1"
+    try:
+        cursor.execute(sql, tuple(parameters))
+        row = cursor.fetchone()
+        return row["silver_relative_path"] if row else None
+    except Exception:
+        logger.exception("[PREVIEW] Could not read Markdown path")
         connection.rollback()
         raise
