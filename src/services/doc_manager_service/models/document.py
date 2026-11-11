@@ -1,6 +1,13 @@
 from datetime import datetime
+from enum import Enum
 
 from pydantic import BaseModel
+
+
+class SubmissionStatus(str, Enum):
+    NOT_SUBMITTED = "NOT_SUBMITTED"
+    SUBMITTED = "SUBMITTED"
+    FAILED = "FAILED"
 
 
 class Document(BaseModel):
@@ -13,6 +20,8 @@ class Document(BaseModel):
     file_created_at: datetime | None = None
     file_modified_at: datetime | None = None
     file_accessed_at: datetime | None = None
+    submission_status: SubmissionStatus = SubmissionStatus.NOT_SUBMITTED
+    submission_error: str | None = None
     is_present: bool = True
     is_parsed: bool = False
     created_at: datetime | None = None

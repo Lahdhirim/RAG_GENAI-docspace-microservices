@@ -1,4 +1,4 @@
-# Intelligent SharePoint
+# Docspace : Document Management Platform
 
 ## Document Manager Service
 
@@ -9,6 +9,9 @@ Available on http://127.0.0.1:8000/
 ### Optional : phpMyAdmin
 
 Available on http://localhost:8080/
+<div style="text-align: center;">
+    <img src="assets/phpAdmin.png" alt="CV" width="950", height="550"/>
+</div>
 
 ## Frontend Application (Codex)
 The frontend is an Angular and TypeScript application designed to provide a modern interface for document management.
@@ -23,6 +26,9 @@ Codex was given the following instructions:
 - Submit all frontend changes through a dedicated GitHub Pull Request for review.
 
 Available on http://localhost:4200/
+<div style="text-align: center;">
+    <img src="assets/web_app.png" alt="CV" width="950", height="550"/>
+</div>
 
 ## Prerequisites
 

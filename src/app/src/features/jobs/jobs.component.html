@@ -1,0 +1,301 @@
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">PARSING MONITOR</p>
+    <h1>Follow every parsing job<span>.</span></h1>
+    <p class="intro">
+      Track recorded submissions, processing times and errors in one place.
+    </p>
+  </div>
+  <button class="button primary" (click)="load()" [disabled]="loading()">
+    <span aria-hidden="true">↻</span> {{ loading() ? "Loading…" : "Refresh" }}
+  </button>
+</section>
+<div class="monitor-note">
+  <strong>Read-only job history</strong>
+  <p>
+    This view shows the job status last recorded by Document Manager. Document
+    parsing state is shown separately from job status.
+  </p>
+</div>
+@if (documentId()) {
+  <div class="document-scope">
+    <span
+      >Job history for document <code>{{ documentId() }}</code></span
+    ><a class="button" routerLink="/parsing">Show all jobs</a>
+  </div>
+}
+<section class="stats" aria-label="Job overview">
+  <article>
+    <span class="stat-icon">⇄</span>
+    <div>
+      <p>Queued or running</p>
+      <strong>{{ loaded() ? active() : "—" }}</strong
+      ><small>Based on recorded job status</small>
+    </div>
+  </article>
+  <article>
+    <span class="stat-icon green">✓</span>
+    <div>
+      <p>Completed jobs</p>
+      <strong>{{ loaded() ? completed() : "—" }}</strong
+      ><small>Document parsing is tracked separately</small>
+    </div>
+  </article>
+  <article>
+    <span class="stat-icon violet">!</span>
+    <div>
+      <p>Needs attention</p>
+      <strong>{{ loaded() ? attention() : "—" }}</strong
+      ><small>Failed, not found or unknown jobs</small>
+    </div>
+  </article>
+</section>
+<section
+  class="library"
+  aria-labelledby="jobs-title"
+  [attr.aria-busy]="loading()"
+>
+  <div class="library-heading">
+    <div>
+      <h2 id="jobs-title">
+        Parsing jobs
+        <span class="count">{{ loaded() ? scoped().length : "—" }}</span>
+      </h2>
+      <p>
+        Newest submissions first. Refresh to retrieve the latest recorded state.
+      </p>
+    </div>
+    <span class="read-only">Read-only</span>
+  </div>
+  <div class="filters">
+    <label class="search"
+      ><span aria-hidden="true">⌕</span><span class="sr-only">Filter jobs</span
+      ><input
+        type="search"
+        placeholder="Filter by document, path or job ID…"
+        [ngModel]="query()"
+        (ngModelChange)="filter('query', $event)" /></label
+    ><label
+      ><span class="sr-only">Job status</span
+      ><select [ngModel]="status()" (ngModelChange)="filter('status', $event)">
+        <option value="all">All statuses</option>
+        @for (value of statuses; track value) {
+          <option [value]="value">{{ label(value) }}</option>
+        }
+      </select></label
+    >
+  </div>
+  @if (loading()) {
+    <div class="state" role="status">
+      <span class="loader" aria-hidden="true"></span>
+      <h3>Loading parsing jobs</h3>
+      <p>Fetching job history from Document Manager…</p>
+    </div>
+  } @else if (error()) {
+    <div class="state error" role="alert">
+      <h3>Unable to load parsing jobs</h3>
+      <p>{{ error() }}</p>
+      <button class="button" (click)="load()">Try again</button>
+    </div>
+  } @else if (!scoped().length) {
+    <div class="state" role="status">
+      <h3>No parsing jobs recorded</h3>
+      <p>
+        {{
+          documentId()
+            ? "No jobs have been recorded for this document."
+            : "Jobs will appear here once Document Manager records a submission."
+        }}
+      </p>
+    </div>
+  } @else if (!filtered().length) {
+    <div class="state" role="status">
+      <h3>No matching jobs</h3>
+      <p>Adjust the status or search filter.</p>
+      <button class="button" (click)="reset()">Reset filters</button>
+    </div>
+  } @else {
+    <div class="table-scroll">
+      <table>
+        <caption class="sr-only">
+          Recorded parsing jobs and durations
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Document / job</th>
+            <th scope="col">Job status</th>
+            <th scope="col">Document parsing</th>
+            <th scope="col">Submitted</th>
+            <th scope="col">Waiting</th>
+            <th scope="col">Execution</th>
+            <th scope="col"><span class="sr-only">Details</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (job of visible(); track job.job_id) {
+            <tr>
+              <td>
+                <div class="file-cell">
+                  <span class="file-icon" aria-hidden="true">⇄</span>
+                  <div>
+                    <button class="file-name" (click)="openDetails(job)">
+                      {{ job.filename || job.document_id }}</button
+                    ><span class="file-path" [title]="job.job_id">{{
+                      job.job_id
+                    }}</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span
+                  class="badge job-status"
+                  [class]="'badge job-status status-' + job.status"
+                  >{{ label(job.status) }}</span
+                >
+              </td>
+              <td>{{ parsedState(job.document_id) }}</td>
+              <td class="nowrap">{{ timestamp(job.submitted_at) }}</td>
+              <td class="nowrap">{{ duration(job.waiting_duration) }}</td>
+              <td class="nowrap">{{ duration(job.execution_duration) }}</td>
+              <td>
+                <button
+                  class="details-button"
+                  (click)="openDetails(job)"
+                  [attr.aria-label]="'Details for job ' + job.job_id"
+                >
+                  →
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <footer class="pagination">
+      <span aria-live="polite"
+        >{{ (page() - 1) * pageSize + 1 }}–{{ end() }} of
+        {{ filtered().length }} jobs</span
+      >
+      <div>
+        <button
+          class="button"
+          (click)="page.set(page() - 1)"
+          [disabled]="page() === 1"
+          aria-label="Previous page"
+        >
+          ←</button
+        ><span>Page {{ page() }} / {{ pageCount() }}</span
+        ><button
+          class="button"
+          (click)="page.set(page() + 1)"
+          [disabled]="page() === pageCount()"
+          aria-label="Next page"
+        >
+          →
+        </button>
+      </div>
+    </footer>
+  }
+</section>
+<div class="page-note">
+  <p>
+    {{
+      error()
+        ? "Refresh failed; previous counters may be out of date."
+        : refreshedAt()
+          ? "Updated at " + refreshedAt()
+          : "Waiting for data"
+    }}
+  </p>
+</div>
+<dialog
+  #details
+  aria-labelledby="job-details-title"
+  (close)="selected.set(null)"
+>
+  @if (selected(); as job) {
+    <div class="dialog-heading">
+      <div>
+        <p class="eyebrow">JOB METADATA</p>
+        <h2 id="job-details-title">{{ job.filename || job.document_id }}</h2>
+      </div>
+      <button
+        class="button"
+        (click)="closeDetails()"
+        aria-label="Close details"
+      >
+        ✕
+      </button>
+    </div>
+    <dl>
+      <dt>Job ID</dt>
+      <dd class="mono">{{ job.job_id }}</dd>
+      <dt>Document ID</dt>
+      <dd class="mono">{{ job.document_id }}</dd>
+      <dt>Relative path</dt>
+      <dd>
+        {{ documentFor(job.document_id)?.relative_path || "Not available" }}
+      </dd>
+      <dt>Document parsing</dt>
+      <dd>{{ parsedState(job.document_id) }}</dd>
+      <dt>Submission status</dt>
+      <dd>
+        {{
+          documentFor(job.document_id)?.submission_status
+            ? label(documentFor(job.document_id)!.submission_status!)
+            : "Not available"
+        }}
+      </dd>
+      <dt>Submission error</dt>
+      <dd>
+        {{
+          documentFor(job.document_id)?.submission_error ??
+            "No submission error reported"
+        }}
+      </dd>
+      <dt>Markdown path</dt>
+      <dd>{{ job.silver_relative_path ?? "Not available" }}</dd>
+      <dt>Recorded status</dt>
+      <dd>{{ label(job.status) }}</dd>
+      <dt>Submitted</dt>
+      <dd>{{ timestamp(job.submitted_at) }}</dd>
+      <dt>Started</dt>
+      <dd>{{ timestamp(job.started_at) }}</dd>
+      <dt>Finished</dt>
+      <dd>{{ timestamp(job.finished_at) }}</dd>
+      <dt>Waiting duration</dt>
+      <dd>{{ duration(job.waiting_duration) }}</dd>
+      <dt>Execution duration</dt>
+      <dd>{{ duration(job.execution_duration) }}</dd>
+      <dt>Error</dt>
+      <dd class="job-error">{{ job.error ?? "No error recorded" }}</dd>
+    </dl>
+    <footer style="gap: 10px; flex-wrap: wrap">
+      @if (documentFor(job.document_id)) {
+        <button class="button" (click)="openPreview(job, 'original')">
+          Preview original</button
+        ><button class="button" (click)="openPreview(job, 'markdown')">
+          Preview Markdown
+        </button>
+      } @else {
+        <p>Document previews are not available.</p>
+      }
+      <button class="button primary" (click)="closeDetails()">Close</button>
+    </footer>
+  }
+</dialog>
+
+@if (metadataUnavailable()) {
+  <p class="page-note" role="status">
+    Document metadata is currently unavailable. Job statuses are still shown.
+  </p>
+}
+
+@if (preview(); as request) {
+  <app-document-preview
+    [document]="request.document"
+    [initialKind]="request.kind"
+    [jobId]="request.jobId"
+    (closed)="preview.set(null)"
+  />
+}

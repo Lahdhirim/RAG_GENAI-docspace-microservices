@@ -5,10 +5,10 @@
 .venv/
 commands.txt
 data/
+silver/
 LICENSE
 logs/
 README.md
-uv.lock
 
 **/__pycache__/
 **/*.pyc
