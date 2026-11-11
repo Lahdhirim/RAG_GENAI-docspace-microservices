@@ -63,47 +63,39 @@ def preview_document(
     )
     with database_lock:
         document = get_document_query(document_id)
-        stored_path = (
-            get_markdown_path_query(document_id, job_id)
-            if document and kind == "markdown"
-            else None
-        )
-    if document is None or (kind == "original" and not document.is_present):
+    if document is None:
         raise HTTPException(status_code=404, detail=unavailable)
-    value = document.relative_path if kind == "original" else stored_path
-    if not value:
-        raise HTTPException(status_code=404, detail=unavailable)
-    try:
-        root = (
-            Path(data_path) / ("bronze" if kind == "original" else "silver")
-        ).resolve(strict=True)
-        relative = Path(value)
-        if ".." in relative.parts or (kind == "original" and relative.is_absolute()):
+
+    if kind == "original":
+        if not document.is_present:
             raise HTTPException(status_code=404, detail=unavailable)
-        if relative.is_absolute():
-            candidate = relative
-        elif kind == "markdown" and relative.parts[:2] == ("data", "silver"):
-            candidate = Path(data_path).parent / relative
-        elif kind == "markdown" and relative.parts[0] == "silver":
-            candidate = Path(data_path) / relative
-        else:
-            candidate = root / relative
-        path = candidate.resolve(strict=True)
-        if not path.is_relative_to(root) or not path.is_file():
+        root = Path(data_path) / "bronze"
+        path = root / document.relative_path
+        extension, media_type = ".pdf", "application/pdf"
+    else:
+        with database_lock:
+            stored_path = get_markdown_path_query(document_id, job_id)
+        if not stored_path:
+            raise HTTPException(status_code=404, detail=unavailable)
+        root = Path(data_path) / "silver"
+        path = Path(stored_path)
+        extension, media_type = ".md", "text/plain"
+
+    return _preview_file(path, root, extension, media_type, unavailable)
+
+
+def _preview_file(
+    path: Path, root: Path, extension: str, media_type: str, unavailable: str
+) -> FileResponse:
+    """Serve an existing file inside its bronze/silver directory."""
+    try:
+        path = path.resolve()
+        if not path.is_relative_to(root.resolve()) or not path.is_file():
             raise HTTPException(status_code=404, detail=unavailable)
         size = path.stat().st_size
     except (OSError, RuntimeError):
         raise HTTPException(status_code=404, detail=unavailable) from None
-    media_type = (
-        "text/plain"
-        if kind == "markdown" and path.suffix.lower() == ".md"
-        else (
-            "application/pdf"
-            if kind == "original" and path.suffix.lower() == ".pdf"
-            else None
-        )
-    )
-    if media_type is None:
+    if path.suffix.lower() != extension:
         raise HTTPException(
             status_code=415,
             detail="Only PDF originals and Markdown outputs can be previewed.",
