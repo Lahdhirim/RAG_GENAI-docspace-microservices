@@ -96,6 +96,7 @@ def submit_parsing_job(job_data: JobData) -> JobResponse:
                 "document_id": job_data.document_id,
                 "filename": job_data.filename,
             },
+            job_timeout=600,
         )
         logger.info(
             "[PARSER SERVICE SUBMIT JOB] Enqueued parsing job %s for document %s with ID %s at path: %s",
