@@ -1,15 +1,23 @@
+import os
+
 from apscheduler.executors.pool import ThreadPoolExecutor
 from apscheduler.schedulers.blocking import BlockingScheduler
 from components.parsing_manager import manage_parsing_jobs
 from components.scanner import sync_documents
+from dotenv import load_dotenv
+
+load_dotenv()
+
+env = os.getenv("ENV", "development")
+data_path = "/app/data" if env == "production" else "data"
 
 scheduler = BlockingScheduler(executors={"default": ThreadPoolExecutor(max_workers=1)})
 
-# Periodically scan documents and synchronize them with the database
-scheduler.add_job(lambda: sync_documents("/app/data"), "interval", seconds=20)
 
-# Submit parsing jobs periodically to the parser_service and update their status
-scheduler.add_job(lambda: manage_parsing_jobs("app/silver"), "interval", seconds=20)
+def run_cycle():
+    sync_documents(f"{data_path}/bronze")
+    manage_parsing_jobs()
 
-# Retrieve documents to parse
+
+scheduler.add_job(run_cycle, "interval", seconds=20)
 scheduler.start()

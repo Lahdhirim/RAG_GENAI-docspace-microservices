@@ -5,7 +5,7 @@ from database.connection import connection, cursor
 logger = logging.getLogger("database")
 
 # Create the documents table
-my_table_creation_query = """
+documents_creation_query = """
 CREATE TABLE IF NOT EXISTS documents (
     id CHAR(64) PRIMARY KEY,
     relative_path VARCHAR(1024) NOT NULL,
@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS documents (
     is_present BOOLEAN NOT NULL DEFAULT TRUE,
     submission_status ENUM('NOT_SUBMITTED', 'SUBMITTED', 'FAILED')
         NOT NULL DEFAULT 'NOT_SUBMITTED',
+    submission_error TEXT NULL,
     is_parsed BOOLEAN NOT NULL DEFAULT FALSE,
 
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -29,17 +30,18 @@ CREATE TABLE IF NOT EXISTS documents (
 );
 """
 try:
-    cursor.execute(my_table_creation_query)
+    cursor.execute(documents_creation_query)
     logger.info("[TABLES DOCUMENTS] Table created successfully.")
 except Exception as e:
     logger.error("[TABLES DOCUMENTS] Error creating table: %s", e)
     raise e
 
 # Create the jobs table
-my_jobs_creation_query = """
+jobs_creation_query = """
 CREATE TABLE IF NOT EXISTS jobs (
     job_id VARCHAR(64) PRIMARY KEY,
     document_id CHAR(64) NOT NULL,
+    relative_path VARCHAR(1024) NOT NULL,
 
     submitted_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     status ENUM('QUEUED', 'NOT_FOUND', 'RUNNING', 'COMPLETED', 'FAILED', 'NOT_STARTED', 'UNKNOWN')
@@ -51,6 +53,8 @@ CREATE TABLE IF NOT EXISTS jobs (
     waiting_duration FLOAT NULL,
     execution_duration FLOAT NULL,
 
+    content LONGTEXT NULL,
+    silver_relative_path VARCHAR(1024) NULL,
     error TEXT NULL,
 
     FOREIGN KEY (document_id) REFERENCES documents(id)
@@ -58,7 +62,7 @@ CREATE TABLE IF NOT EXISTS jobs (
 """
 
 try:
-    cursor.execute(my_jobs_creation_query)
+    cursor.execute(jobs_creation_query)
     logger.info("[TABLES JOBS] Table created successfully.")
 except Exception as e:
     logger.error("[TABLES JOBS] Error creating table: %s", e)

@@ -21,6 +21,7 @@ class Document(BaseModel):
     file_modified_at: datetime | None = None
     file_accessed_at: datetime | None = None
     submission_status: SubmissionStatus = SubmissionStatus.NOT_SUBMITTED
+    submission_error: str | None = None
     is_present: bool = True
     is_parsed: bool = False
     created_at: datetime | None = None

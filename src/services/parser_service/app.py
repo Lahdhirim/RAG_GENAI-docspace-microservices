@@ -3,14 +3,13 @@ from datetime import datetime
 from pathlib import Path
 
 import redis
-from components.parse import parse_document
 from fastapi import FastAPI
 from pydantic import BaseModel
 from rq import Queue
 from utils.job_status import JobStatus
 from utils.logger import create_logger
 
-logger = create_logger("parser_service", "logs/parser_service.log")
+logger = create_logger("parser_api", "logs/parser_api.log")
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -18,7 +17,9 @@ logger.info("[PARSER SERVICE] Starting parser service.")
 
 # Data directory
 DATA_DIR = (
-    Path("/app/data") if os.getenv("ENV") == "production" else Path("data").resolve()
+    Path("/app/data/bronze")
+    if os.getenv("ENV") == "production"
+    else Path("data/bronze").resolve()
 )
 
 # Redis service
@@ -56,6 +57,8 @@ class JobResponse(BaseModel):
     waiting_duration: float | None = None
     execution_duration: float | None = None
     error: str | None = None
+    content: str | None = None
+    silver_relative_path: str | None = None
 
 
 @app.post("/submit")
@@ -87,7 +90,7 @@ def submit_parsing_job(job_data: JobData) -> JobResponse:
 
     try:
         job = jobs_queue.enqueue(
-            parse_document,
+            "components.parse.parse_document",
             str(document_path),
             meta={
                 "document_id": job_data.document_id,
@@ -168,28 +171,41 @@ def get_job_status(job_id: str) -> JobResponse:
         job_status,
     )
 
+    # Get job results if job is completed
+    content = None
+    silver_relative_path = None
+
+    if job_status == JobStatus.COMPLETED and job.result is not None:
+        content = job.result[0]
+        silver_relative_path = str(job.result[1])
+
     # Compute job duration
     submitted_at = job.enqueued_at
     started_at = job.started_at
     finished_at = job.ended_at
     waiting_duration = None
     execution_duration = None
-
     if submitted_at and started_at:
         waiting_duration = (started_at - submitted_at).total_seconds()
-
     if started_at and finished_at:
         execution_duration = (finished_at - started_at).total_seconds()
+
+    # Get worker error if the job failed
+    error = None
+    if job_status == JobStatus.FAILED:
+        error = job.exc_info
 
     return JobResponse(
         job_id=job.id,
         document_id=job.meta.get("document_id"),
         filename=job.meta.get("filename"),
         document_path=str(job.args[0]),
-        submitted_at=submitted_at,
         status=job_status,
         started_at=started_at,
         finished_at=finished_at,
         waiting_duration=waiting_duration,
         execution_duration=execution_duration,
+        content=content,
+        silver_relative_path=silver_relative_path,
+        error=error,
     )

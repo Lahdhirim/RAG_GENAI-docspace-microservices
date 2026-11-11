@@ -7,6 +7,7 @@ from database.queries import (
     get_documents_to_parse,
     insert_parsing_job,
     update_document_submission_status,
+    update_is_parsed_status,
     update_job_status,
 )
 from dotenv import load_dotenv
@@ -57,6 +58,7 @@ def submit_parsing_jobs(documents: list[Document]) -> tuple[dict, dict]:
                 submitted_documents[document.id] = {
                     "job_id": reponse_data.get("job_id"),
                     "document_id": reponse_data.get("document_id"),
+                    "relative_path": reponse_data.get("document_path"),
                     "submitted_at": datetime.fromisoformat(
                         reponse_data.get("submitted_at")
                     ),
@@ -75,6 +77,7 @@ def submit_parsing_jobs(documents: list[Document]) -> tuple[dict, dict]:
                 failed_documents[document.id] = {
                     "job_id": None,
                     "document_id": reponse_data.get("document_id"),
+                    "relative_path": reponse_data.get("document_path"),
                     "status": JobStatus.FAILED,
                     "error": reponse_data.get("error"),
                 }
@@ -90,8 +93,9 @@ def submit_parsing_jobs(documents: list[Document]) -> tuple[dict, dict]:
             failed_documents[document.id] = {
                 "job_id": None,
                 "document_id": document.id,
+                "relative_path": document.relative_path,
                 "status": JobStatus.FAILED,
-                "error": e,
+                "error": str(e),
             }
 
     return submitted_documents, failed_documents
@@ -170,16 +174,17 @@ def update_documents_status(
 
     for document_id, job_data in submitted_documents.items():
         insert_parsing_job(job_data)
-        update_document_submission_status(document_id, "SUBMITTED")
+        update_document_submission_status(document_id, "SUBMITTED", None)
 
     for document_id in failed_documents:
-        update_document_submission_status(document_id, "FAILED")
+        update_document_submission_status(
+            document_id, "FAILED", failed_documents[document_id].get("error")
+        )
 
 
-def manage_parsing_jobs(output_dir: str):
+def manage_parsing_jobs():
     logger.info("=" * 80)
     logger.info("[PARSING JOBS] Submitting parsing jobs.")
-    os.makedirs(output_dir, exist_ok=True)
 
     # 1. Get active jobs from the database
     active_jobs = get_active_parsing_jobs()
@@ -188,8 +193,9 @@ def manage_parsing_jobs(output_dir: str):
     # 2. Get jobs status from the parser service (Redis Queue)
     redis_jobs_status = get_redis_jobs_status(db_jobs=active_jobs)
 
-    # 3. Update SQL jobs table
+    # 3. Update SQL documents and jobs tables
     update_jobs_status(redis_jobs_status)
+    update_is_parsed_status()
 
     # 4. Retrieve the list of documents that need parsing
     documents_to_parse = get_documents_to_parse()

@@ -1,9 +1,10 @@
 import logging
 
-from database.connection import connection, cursor
+from database.connection import connection
 from models.document import Document
 
 logger = logging.getLogger("database")
+cursor = connection.cursor(dictionary=True)
 
 
 ##################################################### Document Queries ###############################################
@@ -90,20 +91,21 @@ def get_documents_query() -> list[Document]:
         for row in rows:
             documents.append(
                 Document(
-                    id=row[0],
-                    relative_path=row[1],
-                    filename=row[2],
-                    extension=row[3],
-                    content_hash=row[4],
-                    size_bytes=row[5],
-                    file_created_at=row[6],
-                    file_modified_at=row[7],
-                    file_accessed_at=row[8],
-                    is_present=row[9],
-                    submission_status=row[10],
-                    is_parsed=row[11],
-                    created_at=row[12],
-                    updated_at=row[13],
+                    id=row["id"],
+                    relative_path=row["relative_path"],
+                    filename=row["file_name"],
+                    extension=row["extension"],
+                    content_hash=row["content_hash"],
+                    size_bytes=row["size_bytes"],
+                    file_created_at=row["file_created_at"],
+                    file_modified_at=row["file_modified_at"],
+                    file_accessed_at=row["file_accessed_at"],
+                    is_present=row["is_present"],
+                    submission_status=row["submission_status"],
+                    submission_error=row["submission_error"],
+                    is_parsed=row["is_parsed"],
+                    created_at=row["created_at"],
+                    updated_at=row["updated_at"],
                 )
             )
         logger.info(f"[GET DOCUMENTS] Fetched {len(documents)} documents.")
@@ -114,27 +116,28 @@ def get_documents_query() -> list[Document]:
         raise
 
 
-def get_document_query(document_id: str) -> Document:
+def get_document_query(document_id: str) -> Document | None:
     try:
         cursor.execute("SELECT * FROM documents WHERE id = %s", (document_id,))
         row = cursor.fetchone()
         if row:
             logger.info(f"[GET DOCUMENT] Document found with ID: {document_id}")
             return Document(
-                id=row[0],
-                relative_path=row[1],
-                filename=row[2],
-                extension=row[3],
-                content_hash=row[4],
-                size_bytes=row[5],
-                file_created_at=row[6],
-                file_modified_at=row[7],
-                file_accessed_at=row[8],
-                is_present=row[9],
-                submission_status=row[10],
-                is_parsed=row[11],
-                created_at=row[12],
-                updated_at=row[13],
+                id=row["id"],
+                relative_path=row["relative_path"],
+                filename=row["file_name"],
+                extension=row["extension"],
+                content_hash=row["content_hash"],
+                size_bytes=row["size_bytes"],
+                file_created_at=row["file_created_at"],
+                file_modified_at=row["file_modified_at"],
+                file_accessed_at=row["file_accessed_at"],
+                is_present=row["is_present"],
+                submission_status=row["submission_status"],
+                submission_error=row["submission_error"],
+                is_parsed=row["is_parsed"],
+                created_at=row["created_at"],
+                updated_at=row["updated_at"],
             )
 
         logger.info(f"[GET DOCUMENT] No document found with ID: {document_id}")
@@ -159,9 +162,9 @@ def get_active_parsing_jobs() -> list[dict]:
         for row in rows:
             jobs.append(
                 {
-                    "job_id": row[0],
-                    "document_id": row[1],
-                    "status": row[2],
+                    "job_id": row["job_id"],
+                    "document_id": row["document_id"],
+                    "status": row["status"],
                 }
             )
         logger.info(
@@ -187,7 +190,10 @@ def update_job_status(job_id: str, job_data: dict) -> bool:
                 started_at = COALESCE(%s, started_at),
                 finished_at = COALESCE(%s, finished_at),
                 waiting_duration = COALESCE(%s, waiting_duration),
-                execution_duration = COALESCE(%s, execution_duration)
+                execution_duration = COALESCE(%s, execution_duration),
+                content = COALESCE(%s, content),
+                silver_relative_path = COALESCE(%s, silver_relative_path),
+                error = COALESCE(%s, error)
             WHERE job_id = %s
               AND status IN ('QUEUED', 'RUNNING', 'UNKNOWN')
             """,
@@ -197,6 +203,9 @@ def update_job_status(job_id: str, job_data: dict) -> bool:
                 job_data.get("finished_at"),
                 job_data.get("waiting_duration"),
                 job_data.get("execution_duration"),
+                job_data.get("content"),
+                job_data.get("silver_relative_path"),
+                job_data.get("error"),
                 job_id,
             ),
         )
@@ -235,20 +244,21 @@ def get_documents_to_parse() -> list[Document]:
         for row in rows:
             documents.append(
                 Document(
-                    id=row[0],
-                    relative_path=row[1],
-                    filename=row[2],
-                    extension=row[3],
-                    content_hash=row[4],
-                    size_bytes=row[5],
-                    file_created_at=row[6],
-                    file_modified_at=row[7],
-                    file_accessed_at=row[8],
-                    is_present=row[9],
-                    submission_status=row[10],
-                    is_parsed=row[11],
-                    created_at=row[12],
-                    updated_at=row[13],
+                    id=row["id"],
+                    relative_path=row["relative_path"],
+                    filename=row["file_name"],
+                    extension=row["extension"],
+                    content_hash=row["content_hash"],
+                    size_bytes=row["size_bytes"],
+                    file_created_at=row["file_created_at"],
+                    file_modified_at=row["file_modified_at"],
+                    file_accessed_at=row["file_accessed_at"],
+                    is_present=row["is_present"],
+                    submission_status=row["submission_status"],
+                    submission_error=row["submission_error"],
+                    is_parsed=row["is_parsed"],
+                    created_at=row["created_at"],
+                    updated_at=row["updated_at"],
                 )
             )
         logger.info(
@@ -270,15 +280,17 @@ def insert_parsing_job(job_data: dict) -> None:
                 job_id,
                 document_id,
                 submitted_at,
-                status
+                status,
+                relative_path
             )
-            VALUES (%s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s)
             """,
             (
                 job_data["job_id"],
                 job_data["document_id"],
                 job_data["submitted_at"],
                 job_data["status"],
+                job_data["relative_path"],
             ),
         )
         connection.commit()
@@ -295,15 +307,17 @@ def insert_parsing_job(job_data: dict) -> None:
 def update_document_submission_status(
     document_id: str,
     submission_status: str,
+    submission_error: str | None,
 ) -> None:
     try:
         cursor.execute(
             """
             UPDATE documents
-            SET submission_status = %s
+            SET submission_status = %s,
+                submission_error = %s
             WHERE id = %s
             """,
-            (submission_status, document_id),
+            (submission_status, submission_error, document_id),
         )
         connection.commit()
         logger.info(
@@ -314,5 +328,61 @@ def update_document_submission_status(
         logger.error(
             f"[UPDATE DOCUMENT SUBMISSION STATUS] Error updating submission status for document: {document_id}"
         )
+        connection.rollback()
+        raise
+
+
+def get_parsing_statuses_query() -> list[tuple]:
+    try:
+        cursor.execute("""
+            SELECT
+                j.job_id,
+                j.document_id,
+                d.file_name,
+                j.status,
+                j.submitted_at,
+                j.started_at,
+                j.finished_at,
+                j.waiting_duration,
+                j.execution_duration,
+                j.error
+            FROM jobs j
+            JOIN documents d ON d.id = j.document_id
+            ORDER BY j.submitted_at DESC
+        """)
+
+        rows = cursor.fetchall()
+        logger.info(f"[GET PARSING STATUSES] Fetched {len(rows)} parsing jobs.")
+        # Preserve the positional response returned by /parsing_statuses.
+        return [tuple(row[column] for column in cursor.column_names) for row in rows]
+
+    except Exception as e:
+        logger.error(f"[GET PARSING STATUSES] Error: {e}")
+        connection.rollback()
+        raise
+
+
+def update_is_parsed_status() -> None:
+    try:
+        cursor.execute("""
+            UPDATE documents d
+            SET d.is_parsed = TRUE
+            WHERE d.is_parsed = FALSE
+              AND EXISTS (
+                  SELECT 1
+                  FROM jobs j
+                  WHERE j.document_id = d.id
+                    AND j.status = 'COMPLETED'
+                    AND j.content IS NOT NULL
+                    AND j.silver_relative_path IS NOT NULL
+              )
+            """)
+        connection.commit()
+        logger.info(
+            f"[UPDATE IS PARSED STATUS] Successfully updated {cursor.rowcount} documents."
+        )
+
+    except Exception as e:
+        logger.error(f"[UPDATE IS PARSED STATUS] Error updating documents: {e}")
         connection.rollback()
         raise
