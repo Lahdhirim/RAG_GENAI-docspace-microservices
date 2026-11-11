@@ -9,9 +9,15 @@ from database.queries import (
     get_markdown_path_query,
     get_parsing_statuses_query,
 )
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
 from fastapi import Path as ApiPath
 from fastapi.responses import FileResponse
+
+load_dotenv()
+
+env = os.getenv("ENV", "development")
+data_path = "/app/data" if env == "production" else "data"
 
 app = FastAPI()
 database_lock = Lock()
@@ -41,9 +47,6 @@ def parsing_statuses():
     return {"statuses": parsing_statuses}
 
 
-DATA_ROOT = Path(
-    os.getenv("DOCUMENT_DATA_ROOT", str(Path(__file__).resolve().parents[3] / "data"))
-)
 MAX_PREVIEW_BYTES = 50 * 1024 * 1024
 PREVIEW_TYPES = {
     ".pdf": "application/pdf",
@@ -86,18 +89,18 @@ def preview_document(
     if not value:
         raise HTTPException(status_code=404, detail=unavailable)
     try:
-        root = (DATA_ROOT / ("bronze" if kind == "original" else "silver")).resolve(
-            strict=True
-        )
+        root = (
+            Path(data_path) / ("bronze" if kind == "original" else "silver")
+        ).resolve(strict=True)
         relative = Path(value)
         if ".." in relative.parts or (kind == "original" and relative.is_absolute()):
             raise HTTPException(status_code=404, detail=unavailable)
         if relative.is_absolute():
             candidate = relative
         elif kind == "markdown" and relative.parts[:2] == ("data", "silver"):
-            candidate = DATA_ROOT.parent / relative
+            candidate = Path(data_path).parent / relative
         elif kind == "markdown" and relative.parts[0] == "silver":
-            candidate = DATA_ROOT / relative
+            candidate = Path(data_path) / relative
         else:
             candidate = root / relative
         path = candidate.resolve(strict=True)

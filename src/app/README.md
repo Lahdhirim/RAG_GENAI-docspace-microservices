@@ -81,6 +81,6 @@ Preview file paths are resolved server-side from SQL by document/job ID, not sup
 
 PDF uses the browser viewer, raster images use image previews, and text is escaped. Markdown supports rendered headings, tables and code plus a Source view; raw HTML is escaped and remote images/links are not loaded. Requests are cancelled when closed or switched, and blob URLs are released. Unsupported original formats and files larger than 50 MiB have explicit messages.
 
-**Deployment:** Document Manager must be able to read the original and silver files. `DOCUMENT_DATA_ROOT` defaults to the repository `data/` directory (`/app/data` in containers). The current Compose configuration does not mount this directory into `doc_manager_api`; that file access remains an infrastructure responsibility. Docker and Compose are unchanged. Paths outside the respective bronze/silver roots are rejected.
+**Deployment:** Document Manager must be able to read the original and silver files. The API follows the existing `load_dotenv()` / `ENV` convention: `data_path` is `/app/data` when `ENV=production`, otherwise `data` relative to the process working directory. The current Compose configuration does not mount this directory into `doc_manager_api`; that file access remains an infrastructure responsibility. Docker and Compose are unchanged. Paths outside the respective bronze/silver roots are rejected.
 
 Additional unit/API/browser scenarios are run internally outside the repository. No new test files or test folders are included in this change; existing tests remain in place.
