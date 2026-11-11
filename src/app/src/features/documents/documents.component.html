@@ -89,6 +89,18 @@
         <option value="size">Largest first</option>
       </select></label
     >
+    <label
+      ><span class="sr-only">Submission status</span
+      ><select
+        [ngModel]="submission()"
+        (ngModelChange)="filter('submission', $event)"
+      >
+        <option value="all">All submissions</option>
+        <option value="NOT_SUBMITTED">Not submitted</option>
+        <option value="SUBMITTED">Submitted</option>
+        <option value="FAILED">Failed</option>
+      </select></label
+    >
   </div>
   @if (loading()) {
     <div class="state" role="status">
@@ -129,7 +141,10 @@
             <th scope="col">Size</th>
             <th scope="col">Last modified</th>
             <th scope="col">Availability</th>
+            <th scope="col">Submission</th>
+            <th scope="col">Submission error</th>
             <th scope="col">Parsing</th>
+            <th scope="col">Previews</th>
             <th scope="col"><span class="sr-only">Details</span></th>
           </tr>
         </thead>
@@ -160,9 +175,40 @@
                 >
               </td>
               <td>
+                <span class="badge">{{
+                  document.submission_status
+                    ? label(document.submission_status)
+                    : "Not available"
+                }}</span>
+              </td>
+              <td>
+                <span
+                  class="file-path"
+                  [title]="document.submission_error ?? ''"
+                  >{{ document.submission_error ?? "—" }}</span
+                >
+              </td>
+              <td>
                 <span class="parse-status">{{
                   document.is_parsed ? "Parsed" : "Not parsed"
                 }}</span>
+              </td>
+              <td>
+                <div style="display: flex; gap: 6px">
+                  <button
+                    class="button"
+                    (click)="openPreview(document, 'original')"
+                    [attr.aria-label]="'Preview original ' + document.filename"
+                  >
+                    Original</button
+                  ><button
+                    class="button"
+                    (click)="openPreview(document, 'markdown')"
+                    [attr.aria-label]="'Preview Markdown ' + document.filename"
+                  >
+                    Markdown
+                  </button>
+                </div>
               </td>
               <td>
                 <button
@@ -207,8 +253,8 @@
   <span aria-hidden="true">ⓘ</span>
   <p>
     A workspace that grows with your documents.<small
-      >Parsing, OpenSearch search and the AI agent are coming in future
-      updates.</small
+      >Follow processing in Parsing. OpenSearch search and the AI agent are
+      coming in future updates.</small
     >
   </p>
   <span class="updated">{{
@@ -247,6 +293,14 @@
       </dd>
       <dt>Availability</dt>
       <dd>{{ doc.is_present ? "Present" : "Absent" }}</dd>
+      <dt>Submission status</dt>
+      <dd>
+        {{
+          doc.submission_status ? label(doc.submission_status) : "Not available"
+        }}
+      </dd>
+      <dt>Submission error</dt>
+      <dd>{{ doc.submission_error ?? "No submission error reported" }}</dd>
       <dt>Parsing</dt>
       <dd>{{ doc.is_parsed ? "Parsed" : "Not parsed" }}</dd>
       <dt>File created</dt>
@@ -260,8 +314,27 @@
       <dt>Metadata updated</dt>
       <dd>{{ date(doc.updated_at) }}</dd>
     </dl>
-    <footer>
+    <footer style="gap: 10px; flex-wrap: wrap">
+      <button class="button" (click)="openPreview(doc, 'original')">
+        Preview original</button
+      ><button class="button" (click)="openPreview(doc, 'markdown')">
+        Preview Markdown
+      </button>
+      <a
+        class="button"
+        routerLink="/parsing"
+        [queryParams]="{ document: doc.id }"
+        >View parsing status</a
+      >
       <button class="button primary" (click)="closeDetails()">Close</button>
     </footer>
   }
 </dialog>
+
+@if (preview(); as request) {
+  <app-document-preview
+    [document]="request.document"
+    [initialKind]="request.kind"
+    (closed)="preview.set(null)"
+  />
+}

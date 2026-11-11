@@ -1,4 +1,4 @@
-/** Contract returned by FastAPI's Document model on worker-service. */
+/** Contract returned by FastAPI's Document model on feat/parser-service. */
 export interface DocumentRecord {
   id: string;
   relative_path: string;
@@ -11,6 +11,8 @@ export interface DocumentRecord {
   file_accessed_at: string | null;
   is_present: boolean;
   is_parsed: boolean;
+  submission_status?: "NOT_SUBMITTED" | "SUBMITTED" | "FAILED";
+  submission_error?: string | null;
   created_at: string | null;
   updated_at: string | null;
 }
@@ -51,6 +53,13 @@ export function isDocumentsResponse(
       row["size_bytes"] >= 0 &&
       typeof row["is_present"] === "boolean" &&
       typeof row["is_parsed"] === "boolean" &&
+      (row["submission_status"] === undefined ||
+        ["NOT_SUBMITTED", "SUBMITTED", "FAILED"].includes(
+          row["submission_status"] as string,
+        )) &&
+      (row["submission_error"] === undefined ||
+        row["submission_error"] === null ||
+        typeof row["submission_error"] === "string") &&
       dates.every(
         (key) =>
           row[key] === null ||

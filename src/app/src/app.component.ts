@@ -1,5 +1,12 @@
-import { Component } from "@angular/core";
-import { RouterLink, RouterLinkActive, RouterOutlet } from "@angular/router";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { Component, inject, signal } from "@angular/core";
+import {
+  NavigationEnd,
+  Router,
+  RouterLink,
+  RouterLinkActive,
+  RouterOutlet,
+} from "@angular/router";
 @Component({
   selector: "app-root",
   imports: [RouterLink, RouterLinkActive, RouterOutlet],
@@ -23,6 +30,12 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from "@angular/router";
           ariaCurrentWhenActive="page"
           ><span aria-hidden="true">▤</span> Documents</a
         >
+        <a
+          routerLink="/parsing"
+          routerLinkActive="active"
+          ariaCurrentWhenActive="page"
+          ><span aria-hidden="true">⇄</span> Parsing</a
+        >
         @for (item of upcoming; track item.label) {
           <button disabled [attr.title]="item.label + ': coming soon'">
             <span aria-hidden="true">{{ item.icon }}</span
@@ -40,7 +53,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from "@angular/router";
       <header class="topbar">
         <span
           >Workspace <span class="breadcrumb">/</span>
-          <strong>Documents</strong></span
+          <strong>{{ pageTitle() }}</strong></span
         ><span class="avatar" aria-label="Document workspace">D</span>
       </header>
       <main id="main" tabindex="-1"><router-outlet /></main>
@@ -48,8 +61,21 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from "@angular/router";
   `,
 })
 export class AppComponent {
+  readonly pageTitle = signal("Documents");
+  private readonly router = inject(Router);
+  constructor() {
+    this.router.events.pipe(takeUntilDestroyed()).subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.pageTitle.set(
+          event.urlAfterRedirects.split("?")[0] === "/parsing"
+            ? "Parsing"
+            : "Documents",
+        );
+        globalThis.document.title = `Docspace · ${this.pageTitle()}`;
+      }
+    });
+  }
   readonly upcoming = [
-    { label: "Parsing", icon: "⇄" },
     { label: "OpenSearch search", icon: "⌕" },
     { label: "AI agent", icon: "✧" },
   ];
