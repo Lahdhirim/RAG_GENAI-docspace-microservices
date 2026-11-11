@@ -1,7 +1,7 @@
 [project]
 name = "doc_manager_service"
 version = "0.1.0"
-description = "Add your description here"
+description = "Document manager service for handling document operations"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [

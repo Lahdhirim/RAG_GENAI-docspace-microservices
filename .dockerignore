@@ -8,7 +8,6 @@ data/
 LICENSE
 logs/
 README.md
-uv.lock
 
 **/__pycache__/
 **/*.pyc

@@ -1,25 +1,20 @@
 [project]
 name = "parser_service"
 version = "0.1.0"
-description = "Add your description here"
+description = "Parser service for document parsing"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "docling>=2.80.0",
-    "easyocr>=1.7.2",
-    "fastapi>=0.162.0",
-    "torch>=2.0.0",
-    "uvicorn>=0.54.0",
     "shared",
     "rq>=3.0.0",
 ]
 
-[tool.uv.sources]
-torch = [
-  { index = "pytorch-cu121" }
+[project.optional-dependencies]
+api = [
+    "fastapi>=0.162.0",
+    "uvicorn>=0.54.0",
 ]
-
-[[tool.uv.index]]
-name = "pytorch-cu121"
-url = "https://download.pytorch.org/whl/cu121"
-explicit = true
+worker = [
+    "docling>=2.80.0",
+    "openai>=2.0.0",
+]

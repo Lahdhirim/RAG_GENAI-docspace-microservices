@@ -73,7 +73,7 @@ services:
   parsing_api:
     build:
       context: .
-      dockerfile: src/services/parser_service/Dockerfile
+      dockerfile: src/services/parser_service/Dockerfile.api
     restart: always
     environment:
       - ENV=production
@@ -86,11 +86,10 @@ services:
   parsing_worker:
     build:
       context: .
-      dockerfile: src/services/parser_service/Dockerfile
+      dockerfile: src/services/parser_service/Dockerfile.worker
     restart: always
     environment:
       - ENV=production
-    command: ["rq", "worker", "parsing_jobs", "--url", "redis://redis:6379/0"]
     depends_on:
       - redis
     volumes:

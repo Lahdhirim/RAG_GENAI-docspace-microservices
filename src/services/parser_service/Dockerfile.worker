@@ -12,11 +12,11 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 # Copy application code and install dependencies
 COPY . .
-RUN uv sync --package parser_service --no-dev
+RUN uv sync --package parser_service --extra worker --no-dev --no-install-project
 
 # Change working directory
 WORKDIR /app/src/services/parser_service
 
-# Run the application using uvicorn
+# Run the RQ worker
 ENV PATH="/app/.venv/bin:$PATH"
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8001"]
+CMD ["rq", "worker", "parsing_jobs", "--url", "redis://redis:6379/0"]
