@@ -48,21 +48,6 @@ def parsing_statuses():
 
 
 MAX_PREVIEW_BYTES = 50 * 1024 * 1024
-PREVIEW_TYPES = {
-    ".pdf": "application/pdf",
-    ".png": "image/png",
-    ".jpg": "image/jpeg",
-    ".jpeg": "image/jpeg",
-    ".gif": "image/gif",
-    ".webp": "image/webp",
-    ".bmp": "image/bmp",
-    ".txt": "text/plain",
-    ".md": "text/plain",
-    ".csv": "text/plain",
-    ".json": "text/plain",
-    ".log": "text/plain",
-    ".xml": "text/plain",
-}
 
 
 @app.get("/documents/{document_id}/preview", response_class=FileResponse)
@@ -112,11 +97,16 @@ def preview_document(
     media_type = (
         "text/plain"
         if kind == "markdown" and path.suffix.lower() == ".md"
-        else PREVIEW_TYPES.get(path.suffix.lower()) if kind == "original" else None
+        else (
+            "application/pdf"
+            if kind == "original" and path.suffix.lower() == ".pdf"
+            else None
+        )
     )
     if media_type is None:
         raise HTTPException(
-            status_code=415, detail="Preview is not supported for this file type."
+            status_code=415,
+            detail="Only PDF originals and Markdown outputs can be previewed.",
         )
     if size > MAX_PREVIEW_BYTES:
         raise HTTPException(

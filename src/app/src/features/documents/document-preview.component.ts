@@ -77,14 +77,6 @@ import { DocumentRecord } from "../../core/documents/document.model";
           >
           to view it.
         </p>
-      } @else if (kind() === "image") {
-        <div class="image-preview">
-          <img
-            [src]="objectUrl()"
-            [alt]="'Preview of ' + document().filename"
-            (error)="renderError()"
-          />
-        </div>
       } @else if (kind() === "markdown") {
         <div style="display:flex;gap:10px">
           <button
@@ -102,12 +94,10 @@ import { DocumentRecord } from "../../core/documents/document.model";
           </button>
         </div>
         @if (source()) {
-          <pre class="text-preview">{{ text() }}</pre>
+          <pre class="markdown-source">{{ text() }}</pre>
         } @else {
           <article class="markdown-preview" [innerHTML]="markdown()"></article>
         }
-      } @else if (kind() === "text") {
-        <pre class="text-preview">{{ text() }}</pre>
       }
     </dialog>
   `,
@@ -141,17 +131,7 @@ import { DocumentRecord } from "../../core/documents/document.model";
         color: #607285;
         line-height: 1.7;
       }
-      .image-preview {
-        overflow: auto;
-        flex: 1;
-        text-align: center;
-      }
-      .image-preview img {
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: contain;
-      }
-      .text-preview {
+      .markdown-source {
         flex: 1;
         overflow: auto;
         white-space: pre-wrap;
@@ -289,7 +269,9 @@ export class DocumentPreviewComponent {
           )
             this.error.set(this.unavailable());
           else if (error instanceof HttpErrorResponse && error.status === 415)
-            this.error.set("Preview is not supported for this file type.");
+            this.error.set(
+              "Only PDF originals and Markdown outputs can be previewed.",
+            );
           else if (error instanceof HttpErrorResponse && error.status === 413)
             this.error.set(
               "This document is too large to preview (maximum 50 MiB).",
@@ -309,36 +291,32 @@ export class DocumentPreviewComponent {
       return;
     }
     const type = blob.type.split(";")[0];
-    if (type === "text/plain") {
+    if (
+      this.currentKind() === "markdown" &&
+      ["text/plain", "text/markdown"].includes(type)
+    ) {
       try {
         const text = await blob.text();
         if (!this.disposed && version === this.version) {
           this.text.set(text);
-          if (this.currentKind() === "markdown") {
-            this.markdown.set(renderMarkdown(text));
-            this.kind.set("markdown");
-          } else this.kind.set("text");
+          this.markdown.set(renderMarkdown(text));
+          this.kind.set("markdown");
         }
       } catch {
         if (!this.disposed && version === this.version) this.renderError();
       }
     } else if (
-      type === "application/pdf" ||
-      [
-        "image/png",
-        "image/jpeg",
-        "image/gif",
-        "image/webp",
-        "image/bmp",
-      ].includes(type)
+      this.currentKind() === "original" &&
+      type === "application/pdf"
     ) {
       const url = URL.createObjectURL(new Blob([blob], { type }));
       this.objectUrl.set(url);
-      if (type === "application/pdf") {
-        // Trust only an internally generated blob URL with an allowlisted PDF MIME type.
-        this.pdfUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(url));
-      } else this.kind.set("image");
-    } else this.error.set("Preview is not supported for this file type.");
+      // Only trust an internally generated PDF blob URL.
+      this.pdfUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(url));
+    } else
+      this.error.set(
+        "Only PDF originals and Markdown outputs can be previewed.",
+      );
     if (!this.disposed && version === this.version) this.loading.set(false);
   }
   renderError(): void {
