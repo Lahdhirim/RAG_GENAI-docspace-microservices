@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: parsing-worker
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: parsing-worker
+  template:
+    metadata:
+      labels:
+        app: parsing-worker
+    spec:
+      containers:
+        - name: parsing-worker
+          image: localhost:5000/intelligent-sharepoint-parsing_worker:version1.0
+          imagePullPolicy: Always
+          env:
+            - name: ENV
+              value: production
+          envFrom:
+            - secretRef:
+                name: parsing-worker-env
+          volumeMounts:
+            - name: shared-data
+              mountPath: /app/data
+      volumes:
+        - name: shared-data
+          persistentVolumeClaim:
+            claimName: parsing-worker-data

@@ -19,4 +19,4 @@ WORKDIR /app/src/services/parser_service
 
 # Run the RQ worker
 ENV PATH="/app/.venv/bin:$PATH"
-CMD ["rq", "worker", "parsing_jobs", "--url", "redis://redis:6379/0"]
+CMD ["rq", "worker", "parsing_jobs", "--url", "redis://host.docker.internal:6379/0"]
