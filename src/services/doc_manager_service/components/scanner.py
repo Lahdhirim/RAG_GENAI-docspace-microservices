@@ -20,10 +20,13 @@ def timeConvert(atime):
 
 
 def scan_documents(directory) -> list[Document]:
-    """Recursively collect metadata and identify files by path plus content hash.
+    """Scan files recursively and identify each document by its path and content.
 
-    Moving or editing a file creates a different identity; synchronization keeps
-    the previous record as absent rather than replacing its parsing history.
+    Args:
+        directory: Root directory containing the source documents.
+
+    Returns:
+        Documents with filesystem metadata and content hashes.
     """
     logger.info(
         f"[SCAN DOCUMENTS] Scanning documents in directory: {directory}. Time : {datetime.now()}"
@@ -35,21 +38,27 @@ def scan_documents(directory) -> list[Document]:
     documents = []
     for root, _, files in os.walk(directory):
         for file in files:
+            # Relative path
             relative_path = os.path.relpath(
                 os.path.join(root, file), directory
             ).replace("\\", "/")
 
+            # Filename and Extension
             filename, extension = os.path.splitext(file)
 
+            # Metadatas
             stats = os.stat(os.path.join(root, file))
 
+            # Content
             with open(os.path.join(root, file), "rb") as f:
                 content_hash = hashlib.sha256(f.read()).hexdigest()
 
+            # Document ID: content + relative path hash
             id = hashlib.sha256(
                 (relative_path + content_hash).encode("utf-8")
             ).hexdigest()
 
+            # Append the document to the list
             documents.append(
                 Document(
                     id=id,
@@ -72,6 +81,15 @@ def scan_documents(directory) -> list[Document]:
 def insert_new_documents(
     local_documents: list[Document], db_documents: list[Document]
 ) -> tuple[dict, dict]:
+    """Insert scanned documents whose IDs are absent from the database.
+
+    Args:
+        local_documents: Documents found by the filesystem scan.
+        db_documents: Documents already recorded in SQL.
+
+    Returns:
+        Added and failed document dictionaries, keyed by document ID.
+    """
     added_documents = {}
     failed_documents = {}
     logger.info("[INSERT NEW DOCUMENTS] Inserting new documents...")
@@ -115,6 +133,15 @@ def insert_new_documents(
 def mark_deleted_documents(
     local_documents: list[Document], db_documents: list[Document]
 ) -> tuple[dict, dict]:
+    """Mark missing documents as absent without deleting their SQL records.
+
+    Args:
+        local_documents: Documents found by the filesystem scan.
+        db_documents: Documents already recorded in SQL.
+
+    Returns:
+        Updated and failed document dictionaries, keyed by document ID.
+    """
     marked_documents = {}
     failed_documents = {}
     logger.info("[MARK DOCUMENT AS DELETED] Updating absent documents...")
@@ -130,6 +157,7 @@ def mark_deleted_documents(
             try:
                 mark_document_as_deleted_query(document_id=db_document_id)
 
+                # Get the updated document from the database
                 new_doc = get_document_query(db_document_id)
 
                 marked_documents[db_document_id] = {
@@ -166,6 +194,15 @@ def mark_deleted_documents(
 def mark_present_documents(
     local_documents: list[Document], db_documents: list[Document]
 ) -> tuple[dict, dict]:
+    """Restore the presence flag for previously absent documents found again.
+
+    Args:
+        local_documents: Documents found by the filesystem scan.
+        db_documents: Documents already recorded in SQL.
+
+    Returns:
+        Restored and failed document dictionaries, keyed by document ID.
+    """
     present_documents = {}
     failed_documents = {}
 
@@ -184,6 +221,7 @@ def mark_present_documents(
             try:
                 mark_document_as_present_query(document_id=db_document_id)
 
+                # Get the updated document from the database
                 new_doc = get_document_query(db_document_id)
 
                 present_documents[db_document_id] = {
@@ -221,28 +259,36 @@ def mark_present_documents(
 
 
 def sync_documents(directory: str) -> None:
-    """Reconcile one filesystem snapshot with SQL, retaining absent records.
+    """Synchronize scanned documents with SQL by adding or updating their presence.
 
-    Insert new identities, mark missing ones absent, and restore returning ones.
-    Each reconciliation helper reports successes and failures keyed by document ID
-    so a database failure for one file does not stop the remaining files.
+    Args:
+        directory: Root directory containing the source documents.
+
+    Returns:
+        None.
     """
     logger.info("=" * 80)
     logger.info(
         f"[SYNC DOCUMENTS] Starting document synchronization for directory: {directory}"
     )
+    # 1. Scan the documents in the specified directory
     local_documents = scan_documents(directory)
 
+    # 2. Get all documents from the database
     db_documents = get_documents_query()
 
+    # 3. Compare local documents with database documents and determine which ones need to be added or updated
+    ## 3.a Insert new documents
     succ2a_documents, f2a_documents = insert_new_documents(
         local_documents=local_documents, db_documents=db_documents
     )
 
+    ## 3.b Update is_present status for deleted documents
     succ2u_documents, f2u_documents = mark_deleted_documents(
         local_documents=local_documents, db_documents=db_documents
     )
 
+    ## 3.c Restore documents that are present again
     succ2p_documents, f2p_documents = mark_present_documents(
         local_documents=local_documents, db_documents=db_documents
     )

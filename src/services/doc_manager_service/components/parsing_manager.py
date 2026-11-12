@@ -23,10 +23,13 @@ parser_service_host = "parsing_api" if env == "production" else "127.0.0.1"
 
 
 def submit_parsing_jobs(documents: list[Document]) -> tuple[dict, dict]:
-    """Submit via the parser API and return success/failure maps by document ID.
+    """Submit documents to the parser API for asynchronous conversion.
 
-    Enqueueing happens here; the caller persists the returned job references and
-    submission outcomes in SQL afterwards.
+    Args:
+        documents: Documents selected for parsing.
+
+    Returns:
+        Queued and failed submission dictionaries, keyed by document ID.
     """
     submitted_documents = {}
     failed_documents = {}
@@ -107,7 +110,14 @@ def submit_parsing_jobs(documents: list[Document]) -> tuple[dict, dict]:
 
 
 def get_redis_jobs_status(db_jobs: list[dict]) -> dict[str, dict]:
-    """Poll through the parser API; UNKNOWN means polling failed, not parsing."""
+    """Fetch tracked job statuses through the parser API.
+
+    Args:
+        db_jobs: SQL job records containing the job IDs to poll.
+
+    Returns:
+        Status responses keyed by job ID, with UNKNOWN for polling errors.
+    """
     job_updates = {}
     for db_job in db_jobs:
         db_job_id = db_job.get("job_id")
@@ -132,6 +142,14 @@ def get_redis_jobs_status(db_jobs: list[dict]) -> dict[str, dict]:
 
 
 def update_jobs_status(job_updates: dict[str, dict]) -> None:
+    """Normalize polling timestamps and save supported job statuses in SQL.
+
+    Args:
+        job_updates: Responses keyed by job ID; timestamps are converted in place.
+
+    Returns:
+        None.
+    """
     updated_count = 0
 
     valid_statuses = {
@@ -159,8 +177,6 @@ def update_jobs_status(job_updates: dict[str, dict]) -> None:
             )
             continue
 
-        # SQL DATETIME stores naive values; strip the API's timezone metadata
-        # without changing the timestamp's clock fields.
         for field in ("started_at", "finished_at"):
             if job_data.get(field):
                 job_data[field] = datetime.fromisoformat(
@@ -179,6 +195,15 @@ def update_jobs_status(job_updates: dict[str, dict]) -> None:
 def update_documents_status(
     submitted_documents: dict[str, dict], failed_documents: dict[str, dict]
 ) -> None:
+    """Persist queued jobs and update document submission outcomes in SQL.
+
+    Args:
+        submitted_documents: Queued job details keyed by document ID.
+        failed_documents: Submission failures keyed by document ID.
+
+    Returns:
+        None.
+    """
 
     for document_id, job_data in submitted_documents.items():
         insert_parsing_job(job_data)
@@ -191,30 +216,35 @@ def update_documents_status(
 
 
 def manage_parsing_jobs():
-    """Reconcile existing jobs before selecting and submitting new documents.
+    """Update tracked jobs, submit eligible documents, and persist the outcomes.
 
-    Only this service writes SQL. The parser API owns queue operations, so
-    enqueueing and recording a submission are separate operations.
+    Returns:
+        None.
     """
     logger.info("=" * 80)
     logger.info("[PARSING JOBS] Submitting parsing jobs.")
 
-    # Persist completed results before checking which documents still need work.
+    # 1. Get active jobs from the database
     active_jobs = get_active_parsing_jobs()
     logger.info("[PARSING JOBS] Retrieved %d active parsing jobs.", len(active_jobs))
 
+    # 2. Get jobs status from the parser service (Redis Queue)
     redis_jobs_status = get_redis_jobs_status(db_jobs=active_jobs)
 
+    # 3. Update SQL documents and jobs tables
     update_jobs_status(redis_jobs_status)
     update_is_parsed_status()
 
+    # 4. Retrieve the list of documents that need parsing
     documents_to_parse = get_documents_to_parse()
     logger.info(
         "[PARSING JOBS] Retrieved %d documents to parse.", len(documents_to_parse)
     )
 
+    # 5. Submit parsing jobs to the parser service
     submitted_documents, failed_documents = submit_parsing_jobs(documents_to_parse)
 
+    # 6. Update SQL documents tables
     update_documents_status(submitted_documents, failed_documents)
 
     logger.info("[PARSING JOBS] Submitted documents: %s", submitted_documents)

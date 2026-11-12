@@ -20,7 +20,6 @@ env = os.getenv("ENV", "development")
 data_path = "/app/data" if env == "production" else "data"
 
 app = FastAPI()
-# FastAPI runs synchronous routes in threads; they share one database cursor.
 database_lock = Lock()
 
 
@@ -57,10 +56,15 @@ def preview_document(
     kind: Literal["original", "markdown"] = "original",
     job_id: str | None = Query(default=None, min_length=1, max_length=64),
 ):
-    """Resolve a PDF original or a completed job's Markdown before serving it.
+    """Serve the original PDF or a completed job's Markdown for a document.
 
-    Markdown can remain available after the original disappears. Supplying a
-    job ID scopes Markdown to that run rather than the latest completed run.
+    Args:
+        document_id: ID of the document to preview.
+        kind: Preview type: original or markdown.
+        job_id: Markdown run to use; None selects the latest completed run.
+
+    Returns:
+        An inline response containing the requested file.
     """
     unavailable = (
         "This document is currently unavailable."
@@ -93,9 +97,19 @@ def preview_document(
 def _preview_file(
     path: Path, root: Path, extension: str, media_type: str, unavailable: str
 ) -> FileResponse:
-    """Serve an existing file inside its bronze/silver directory."""
+    """Serve an existing file inside its bronze/silver directory.
+
+    Args:
+        path: File to serve.
+        root: Directory the resolved file must remain inside.
+        extension: Allowed file extension, including the leading dot.
+        media_type: MIME type of the response.
+        unavailable: Error message for a missing or inaccessible file.
+
+    Returns:
+        An inline file response after path, type, and size checks.
+    """
     try:
-        # Resolve symlinks before checking containment in the expected data tier.
         path = path.resolve()
         if not path.is_relative_to(root.resolve()) or not path.is_file():
             raise HTTPException(status_code=404, detail=unavailable)

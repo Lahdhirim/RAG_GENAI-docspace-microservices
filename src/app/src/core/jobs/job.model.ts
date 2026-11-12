@@ -21,10 +21,7 @@ export interface ParsingJob {
   error: string | null;
   silver_relative_path: string | null;
 }
-/**
- * Validate and map the positional /parsing_statuses SQL projection.
- * Accept the original ten columns and the added eleventh Markdown-path column.
- */
+/** Map the existing /parsing_statuses SQL projection; never assume object rows. */
 export function parseStatusesResponse(value: unknown): ParsingJob[] {
   if (
     !value ||

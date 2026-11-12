@@ -3,10 +3,15 @@ import os
 
 
 def create_logger(name: str, log_file: str, propagate: bool = True) -> logging.Logger:
-    """Configure a named file logger once, reusing its handlers on later calls.
+    """Create and configure a logger writing to a specific file.
 
-    The first setup opens the file in write mode; later calls for the same logger
-    retain its existing handlers and propagation setting.
+    Args:
+        name: Logger name used to find or create the instance.
+        log_file: Output file used when the logger has no handlers.
+        propagate: Whether records propagate to parent loggers on initial setup.
+
+    Returns:
+        The named logger with its existing or newly configured handlers.
     """
 
     logger = logging.getLogger(name)
@@ -14,6 +19,7 @@ def create_logger(name: str, log_file: str, propagate: bool = True) -> logging.L
 
     if not logger.handlers:
 
+        # Ensure log directory exists
         os.makedirs("logs", exist_ok=True)
 
         file_handler = logging.FileHandler(log_file, mode="w")

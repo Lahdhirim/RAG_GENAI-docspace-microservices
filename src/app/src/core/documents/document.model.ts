@@ -1,4 +1,4 @@
-/** Contract returned by the Document Manager API's Document model. */
+/** Contract returned by FastAPI's Document model on feat/parser-service. */
 export interface DocumentRecord {
   id: string;
   relative_path: string;
@@ -19,6 +19,11 @@ export interface DocumentRecord {
 export interface DocumentsResponse {
   documents: DocumentRecord[];
 }
+/**
+ * Validate the document list response before it is used by the interface.
+ * @param value - Untrusted API response.
+ * @returns Whether the value matches the document list contract.
+ */
 export function isDocumentsResponse(
   value: unknown,
 ): value is DocumentsResponse {

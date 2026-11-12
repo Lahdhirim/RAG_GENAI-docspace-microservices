@@ -234,9 +234,8 @@ export class DocumentPreviewComponent {
       ? "This document is currently unavailable."
       : "Markdown is not available for this document.";
   }
+  /** Fetch the selected preview and update its loading and error state. */
   load(): void {
-    // Unsubscribing cancels HTTP, but not Blob.text(); the version also prevents
-    // a previous preview's asynchronous decoding from updating the current view.
     const version = ++this.version;
     this.request?.unsubscribe();
     this.loading.set(false);
@@ -285,6 +284,12 @@ export class DocumentPreviewComponent {
         },
       });
   }
+  /**
+   * Display a PDF or decode Markdown for the current preview request.
+   * @param blob - File returned by the preview API.
+   * @param version - Load version used to ignore stale results.
+   * @returns A promise resolved after processing the preview.
+   */
   private async show(blob: Blob, version: number): Promise<void> {
     if (this.disposed || version !== this.version) return;
     if (blob.size > 50 * 1024 * 1024) {
@@ -330,7 +335,6 @@ export class DocumentPreviewComponent {
     this.dialog().nativeElement.close();
   }
   private releaseUrl(): void {
-    // Release PDF blob memory whenever the preview changes or is destroyed.
     this.pdfUrl.set(null);
     if (this.objectUrl()) URL.revokeObjectURL(this.objectUrl());
     this.objectUrl.set("");

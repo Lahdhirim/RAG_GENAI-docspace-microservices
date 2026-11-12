@@ -78,11 +78,13 @@ logger.info("DocumentConverter initialized.")
 
 
 def parse_document(relative_path: str) -> tuple[str, Path]:
-    """Convert a bronze PDF with the remote VLM and save its Markdown in silver.
+    """Convert a bronze PDF into a saved Markdown file.
 
-    The input is the source path supplied by the parser API. Mirror its bronze
-    subdirectories under silver, replacing the extension with .md, and return
-    (content, saved path) for the job-status API to expose to the document manager.
+    Args:
+        relative_path: Source PDF path under the bronze directory.
+
+    Returns:
+        Markdown content and the saved file path.
     """
     logger.info(f"Parsing document: {relative_path}")
     if not os.path.exists(relative_path):
@@ -96,6 +98,7 @@ def parse_document(relative_path: str) -> tuple[str, Path]:
             f"Document {relative_path} successfully parsed. Output has {len(md_result)} characters."
         )
 
+        # Save the markdown result
         output_relative = Path(relative_path).relative_to(DATA_DIR)
         output_path = Path(OUTPUT_DIR) / output_relative.with_suffix(".md")
         output_path.parent.mkdir(parents=True, exist_ok=True)

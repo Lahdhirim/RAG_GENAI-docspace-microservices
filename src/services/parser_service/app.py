@@ -63,7 +63,14 @@ class JobResponse(BaseModel):
 
 @app.post("/submit")
 def submit_parsing_job(job_data: JobData) -> JobResponse:
-    """Check the source file and enqueue conversion without writing to SQL."""
+    """Check the source file and enqueue a document conversion job.
+
+    Args:
+        job_data: Document ID, source path relative to bronze, and filename.
+
+    Returns:
+        Queued job details or a failed submission with its error.
+    """
     logger.info(
         "[PARSER SERVICE SUBMIT JOB] Received parsing job for document %s with ID %s with relative_path: %s",
         job_data.filename,
@@ -90,8 +97,6 @@ def submit_parsing_job(job_data: JobData) -> JobResponse:
         )
 
     try:
-        # Resolve the callable in the worker so the API does not import Docling
-        # or initialize its remote-model client.
         job = jobs_queue.enqueue(
             "components.parse.parse_document",
             str(document_path),
@@ -137,13 +142,19 @@ def submit_parsing_job(job_data: JobData) -> JobResponse:
 
 @app.get("/job_status/{job_id}")
 def get_job_status(job_id: str) -> JobResponse:
-    """Translate RQ state, timings, and conversion results into the API contract.
+    """Translate an RQ job's state and conversion result into an API response.
 
-    NOT_FOUND describes missing Redis job data; SQL history is managed separately
-    by the document manager.
+    Args:
+        job_id: ID of the job to look up in Redis.
+
+    Returns:
+        Job status, timings, result, and error details, or NOT_FOUND if missing.
     """
+
+    # Fetch the job from the queue
     job = jobs_queue.fetch_job(job_id)
 
+    # Job not found in the queue
     if not job:
         logger.warning(
             "[PARSER SERVICE GET JOB STATUS] Job with ID %s not found in the queue.",
@@ -158,6 +169,7 @@ def get_job_status(job_id: str) -> JobResponse:
             error=f"Job with ID {job_id} not found in the queue.",
         )
 
+    # Get job status
     rq_status = job.get_status(refresh=True)
     status_mapping = {
         "queued": JobStatus.QUEUED,
@@ -176,14 +188,15 @@ def get_job_status(job_id: str) -> JobResponse:
         job_status,
     )
 
+    # Get job results if job is completed
     content = None
     silver_relative_path = None
 
     if job_status == JobStatus.COMPLETED and job.result is not None:
-        # parse_document returns (Markdown content, saved silver path).
         content = job.result[0]
         silver_relative_path = str(job.result[1])
 
+    # Compute job duration
     submitted_at = job.enqueued_at
     started_at = job.started_at
     finished_at = job.ended_at
@@ -194,6 +207,7 @@ def get_job_status(job_id: str) -> JobResponse:
     if started_at and finished_at:
         execution_duration = (finished_at - started_at).total_seconds()
 
+    # Get worker error if the job failed
     error = None
     if job_status == JobStatus.FAILED:
         error = job.exc_info
