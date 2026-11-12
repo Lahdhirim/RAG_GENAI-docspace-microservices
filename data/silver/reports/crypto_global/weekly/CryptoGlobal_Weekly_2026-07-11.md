@@ -24,28 +24,11 @@ Market state and the week's key readings across majors, options and flows.
 
 ## MAJORS (price | 7d | 30d | 90d)
 
-| Asset   |     Price | 7d     | 30d    | 90d    |
-|---------|-----------|--------|--------|--------|
-| BTC     | 64,119.99 | +1.6%  | +0.9%  | -9.4%  |
-| ETH     |  1,798.56 | +1.1%  | +7.6%  | -18.0% |
-| SOL     |     77.97 | -4.5%  | +16.7% | -4.4%  |
-| BNB     |    579.09 | +0.7%  | -4.3%  | -2.2%  |
-| XRP     |      1.11 | -4.3%  | -3.0%  | -16.4% |
-| DOGE    |      0.07 | -4.0%  | -13.3% | -18.0% |
-| ADA     |      0.17 | -12.7% | -1.6%  | -29.1% |
-| AVAX    |      6.73 | -3.4%  | +1.4%  | -25.5% |
-| LINK    |      8.01 | +0.1%  | +1.6%  | -8.4%  |
-| TRX     |      0.33 | +1.8%  | +4.5%  | +2.9%  |
-| DOT     |      0.88 | -0.7%  | -7.7%  | -28.3% |
-| NEAR    |      1.90 | -5.0%  | -8.0%  | +41.0% |
-| LTC     |     45.14 | +0.7%  | +6.2%  | -15.6% |
-| BCH     |    247.20 | +4.7%  | +20.4% | -41.3% |
-| SUI     |      0.74 | -2.7%  | -1.8%  | -17.8% |
+| BTC | 64,119.99 | +1.6% | +0.9% | -9.4% | | ETH | 1,798.56 | +1.1% | +7.6% | -18.0% | | SOL | 77.97 | -4.5% | +16.7% | -4.4% | | BNB | 579.09 | +0.7% | -4.3% | -2.2% | | XRP | 1.11 | -4.3% | -3.0% | -16.4% | | DOGE | 0.07 | -4.0% | -13.3% | -18.0% | | ADA | 0.17 | -12.7% | -1.6% | -29.1% | | AVAX | 6.73 | -3.4% | +1.4% | -25.5% | | LINK | 8.01 | +0.1% | +1.6% | -8.4% | | TRX | 0.33 | +1.8% | +4.5% | +2.9% | | DOT | 0.88 | -0.7% | -7.7% | -28.3% | | NEAR | 1.90 | -5.0% | -8.0% | +41.0% | | LTC | 45.14 | +0.7% | +6.2% | -15.6% | | BCH | 247.20 | +4.7% | +20.4% | -41.3% | | SUI | 0.74 | -2.7% | -1.8% | -17.8% |
 
 ETH/BTC 0.02805 | alt-breadth 50% of majors beating BTC (30d)
 
-Authored by ABL Digital Technologies Private Limited. All rights reserved.  
-For inquiries, contact [admin@abldigitech.com](mailto:admin@abldigitech.com)
+Authored by ABL Digital Technologies Private Limited. All rights reserved. For inquiries, contact [admin@abldigitech.com](mailto:admin@abldigitech.com)
 
 # Cryptoglobal Analysis
 

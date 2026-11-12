@@ -17,4 +17,6 @@ api = [
 worker = [
     "docling>=2.80.0",
     "openai>=2.0.0",
+    "torch",
+    "torchvision",
 ]

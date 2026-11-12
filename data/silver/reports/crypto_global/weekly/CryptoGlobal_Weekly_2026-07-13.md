@@ -219,7 +219,7 @@ PCA on majors' daily returns: PC1 explains 69% of variance. High PC1 = the marke
 | XRP   |           +0.66 |            +0.02 |
 | DOGE  |           +0.78 |            +0.01 |
 
-Authored by ABL Digital Technologies Private Limited. All rights reserved. For inquiries, contact [admin@abldigittech.com](mailto:admin@abldigittech.com)
+Authored by ABL Digital Technologies Private Limited. All rights reserved. For inquiries, contact [admin@abldigitotech.com](mailto:admin@abldigitotech.com)
 
 # Historical Trend - Key Metrics
 

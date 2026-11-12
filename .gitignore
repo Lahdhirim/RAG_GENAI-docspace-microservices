@@ -9,7 +9,6 @@ logs/
 
 # Virtual environments
 .venv
-uv.lock
 
 # Environment variables
 .env
@@ -17,3 +16,4 @@ uv.lock
 # Other
 commands.txt
 .ruff_cache/
+archive/

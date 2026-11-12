@@ -72,8 +72,6 @@ Since late last year, there have been pronounced capital outflows from Bitcoin a
 
 ### 6. Total Assets of Major Bitcoin Exchange-Traded Products (ETP) by Investor Type (in USD billions)
 
-Holdings in major Bitcoin ETPs declined as investment advisors and brokerages led the pullback.
-
 - Holdings in the five main Bitcoin exchange-traded products (ETPs) have declined from their mid-2025 peak, with the pullback concentrated among investment advisors and brokerages, which had previously driven much of the growth.
 - By late-2025 and early-2026, the investor base remained diversified, but overall positioning moderated, suggesting some cooling in institutional demand after the earlier surge, even as participation from hedge funds, private equity, and other investors remained relatively stable.
 
@@ -89,10 +87,6 @@ Aggregate assets of crypto ETPs declined sharply.
 
 ### 7. Assets of Crypto Exchange-Traded Products by Country (in USD billions)
 
-<!-- image -->
-
-Chart: Assets of Crypto Exchange-Traded Products by Country (in USD billions)
-
 - Total assets of crypto ETPs reached a peak of USD 230 billion in September 2025, before declining through Q4 2025 and Q1 2026. Aggregate assets fell by around 45 percent, to USD 127 billion in February 2026, relative to the September peak.
 - The U.S., Switzerland, and Canada remained the three largest markets for crypto ETPs, with market shares of 83 percent, 5 percent, 4 percent respectively.
 - Germany's market share increased to 4 percent while Brazil's rose moderately to 1 percent. In contrast, market shares of Sweden and Hong Kong have declined since Q3 2025.
@@ -100,18 +94,13 @@ Chart: Assets of Crypto Exchange-Traded Products by Country (in USD billions)
 
 ### 8. Corporate Bitcoin Holdings by Country
 
-<!-- image -->
-
-Chart: Corporate Bitcoin Holdings by Country
-
-- Corporate Bitcoin holdings—Bitcoin reserves that companies hold on their balance sheets—provide investors with indirect exposure to Bitcoin when holding the stock of these corporates. When Bitcoin holdings represent a substantial fraction of the balance sheets of these corporates, holding the stock of these companies is similar to holding Bitcoin ETFs.
+- Total value of corporate Bitcoin holdings declined by 30 percent since September 2026, with the U.S. remaining the largest host country.
+- Corporate Bitcoin holdings-Bitcoin reserves that companies hold on their balance sheets-provide investors with indirect exposure to Bitcoin when holding the stock of these corporates. When Bitcoin holdings represent a substantial fraction of the balance sheets of these corporates, holding the stock of these companies is similar to holding Bitcoin ETFs.
 - Globally, the total Bitcoin holdings by public companies declined by over 30 percent, to USD 126 billion, from their September peak, largely due to price declines.
 - 91 percent of corporate Bitcoin holdings originate from companies in the U.S., followed by Japan and China.
 - The largest corporate Bitcoin holder, Strategy, increased its Bitcoin purchases in Q1 2026, despite reporting a USD 14.46 billion unrealized loss on its Bitcoin holdings during the same period.
 
-Total value of corporate Bitcoin holdings declined by 30 percent since September 2026, with the U.S. remaining the largest host country.
-
-IMF | Monetary and Capital Markets—Global Markets Analysis and Payments Infrastructure
+IMF | Monetary and Capital Markets-Global Markets Analysis and Payments Infrastructure
 
 CRYPTO ASSETS MONITOR: Q1 2026 APRIL 9, 2026
 
@@ -277,27 +266,12 @@ CRYPTO ASSETS MONITOR: Q1 2026 APRIL 9, 2026
 
 ### 19. USDT Asset Backing (in percent)
 
-- **Cash and Deposits**
-- **Repo**
-- **UST**
-- **Corporate Bonds**
-- **Other ST Assets**
-- **Precious Metals**
-- **Bitcoin**
-- **Secured loans**
-- **Other assets**
-
-### 20. USDC Asset Backing (in percent)
-
-- **Cash and Deposits**
-- **Repo**
-- **UST**
-- **Corporate Bonds**
-- **Other ST Assets**
-- **Other Assets**
 - Over 60 percent of USDT's backing assets remained to be U.S. Treasuries. Overnight repo continued to account for 10 percent of USDT assets. In total, U.S. Treasuries, repo, and short-term assets declined to 76 percent.
 - Meanwhile, the share of precious metals in USDT's backing assets increased from 5 percent in June 2025 to 9 percent in December 2026. Over the same period, the share of secured loans rose from 6 percent to 9 percent. These other riskier assets are largely not compliant with the new Genius Act.
 - As for newly issued USA$, its backing assets consisted of reverse repos (89 percent), as well as cash and deposits (11 percent).
+
+### 20. USDC Asset Backing (in percent)
+
 - Overnight repo, mostly with G-SIBs, accounted for a larger share (67 percent) of USDC's backing assets. Shares of U.S. Treasuries and cash declined, representing 23 and 10 percent respectively as of December 2025.
 
 IMF | Monetary and Capital Markets-Global Markets Analysis and Payments Infrastructure 11
@@ -328,7 +302,7 @@ Chart: Total Value Locked in DeFi (in USD billions)
 - Analysts attributed TVL declines to a broader crypto market correction and associated deleveraging. Falling prices of major crypto assets, especially Ether, reduced the value of assets locked in DeFi protocols.
 - Ethereum continued to dominate the DeFi landscape, representing around 60 percent of the TVL in the sector.
 
-**Sources** : Allium, Anchorage Digital, BCG Stablecoin Payments Dashboard, Binance Global, Bloomberg L.P., CoinGecko, Chainalysis, Coinbase, DefiLlama, EPFR, Federal Reserve Bank of Dallas, Crane Data, IMF April 2025 Global Financial Stability Report, BDO Independent Auditors’ Report on the Financials, Figures, and Reserves Report (Tether), Deloitte’s Independent Accountants’ Report (USDC and USDT), Visa Onchain Analytics Dashboard, and Reuter, M. (2025), *Decrypting Crypto: How to Estimate International Stablecoin Flows* , IMF Working Paper.
+**Sources** : Allium, Anchorage Digital, BCG Stablecoin Payments Dashboard, Binance Global, Bloomberg L.P., CoinGecko, Chainalysis, Coinbase, DefiLlama, EPFR, Federal Reserve Bank of Dallas, Crane Data, IMF April 2025 Global Financial Stability Report, BDO Independent Auditors’ Report on the Financials, Figures, and Reserves Report (Tether), Deloitte’s Independent Accountants’ Report (USDC and USAT), Visa Onchain Analytics Dashboard, and Reuter, M. (2025), *Decrypting Crypto: How to Estimate International Stablecoin Flows* , IMF Working Paper.
 
 IMF | Monetary and Capital Markets—Global Markets Analysis and Payments Infrastructure
 
