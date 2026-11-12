@@ -5,12 +5,16 @@ from pydantic import BaseModel
 
 
 class SubmissionStatus(str, Enum):
+    """Submission state of a document to the parser service."""
+
     NOT_SUBMITTED = "NOT_SUBMITTED"
     SUBMITTED = "SUBMITTED"
     FAILED = "FAILED"
 
 
 class Document(BaseModel):
+    """Metadata and processing state of a tracked document."""
+
     id: str
     relative_path: str
     filename: str

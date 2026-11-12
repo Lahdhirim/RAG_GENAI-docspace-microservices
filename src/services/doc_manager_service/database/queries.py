@@ -9,6 +9,7 @@ cursor = connection.cursor(dictionary=True)
 
 ##################################################### Document Queries ###############################################
 def add_document_query(document: Document) -> None:
+    """Insert a new document into the documents table."""
     try:
         cursor.execute(
             "INSERT INTO documents (id, relative_path, file_name, extension, content_hash, size_bytes, file_created_at, file_modified_at, file_accessed_at) VALUES (%s, %s, %s,%s, %s, %s, %s, %s, %s)",
@@ -34,6 +35,7 @@ def add_document_query(document: Document) -> None:
 
 
 def mark_document_as_present_query(document_id: str) -> None:
+    """Set is_present to TRUE for a restored document."""
     try:
         cursor.execute(
             "UPDATE documents SET is_present = TRUE WHERE id = %s AND is_present = FALSE",
@@ -59,6 +61,7 @@ def mark_document_as_present_query(document_id: str) -> None:
 
 
 def mark_document_as_deleted_query(document_id: str) -> None:
+    """Set is_present to FALSE for an absent document."""
     try:
         cursor.execute(
             "UPDATE documents SET is_present = FALSE WHERE id = %s AND is_present = TRUE",
@@ -84,6 +87,7 @@ def mark_document_as_deleted_query(document_id: str) -> None:
 
 
 def get_documents_query() -> list[Document]:
+    """Return all documents from the database."""
     try:
         cursor.execute("SELECT * FROM documents")
         rows = cursor.fetchall()
@@ -117,6 +121,7 @@ def get_documents_query() -> list[Document]:
 
 
 def get_document_query(document_id: str) -> Document | None:
+    """Return a document by its ID."""
     try:
         cursor.execute("SELECT * FROM documents WHERE id = %s", (document_id,))
         row = cursor.fetchone()
@@ -153,6 +158,7 @@ def get_document_query(document_id: str) -> Document | None:
 
 ##################################################### Jobs Queries ###############################################
 def get_active_parsing_jobs() -> list[dict]:
+    """Return the jobs that are still queued, running or in an unknown state."""
     try:
         cursor.execute(
             "SELECT job_id, document_id, status FROM jobs WHERE status IN ('QUEUED', 'RUNNING', 'UNKNOWN')"
@@ -181,6 +187,7 @@ def get_active_parsing_jobs() -> list[dict]:
 
 
 def update_job_status(job_id: str, job_data: dict) -> bool:
+    """Update an active job with new data and return whether a row was changed."""
     try:
         cursor.execute(
             """
@@ -224,6 +231,7 @@ def update_job_status(job_id: str, job_data: dict) -> bool:
 
 
 def get_documents_to_parse() -> list[Document]:
+    """Return present documents that have never been submitted for parsing."""
     try:
         cursor.execute("""
                 SELECT *
@@ -273,6 +281,7 @@ def get_documents_to_parse() -> list[Document]:
 
 
 def insert_parsing_job(job_data: dict) -> None:
+    """Insert a newly submitted parsing job into the jobs table."""
     try:
         cursor.execute(
             """
@@ -309,6 +318,7 @@ def update_document_submission_status(
     submission_status: str,
     submission_error: str | None,
 ) -> None:
+    """Update the submission status and error of a document."""
     try:
         cursor.execute(
             """
@@ -333,6 +343,7 @@ def update_document_submission_status(
 
 
 def get_parsing_statuses_query() -> list[tuple]:
+    """Return all parsing jobs joined with their document filename, newest first."""
     try:
         cursor.execute("""
             SELECT
@@ -364,6 +375,7 @@ def get_parsing_statuses_query() -> list[tuple]:
 
 
 def update_is_parsed_status() -> None:
+    """Mark documents as parsed when they have a completed job with output."""
     try:
         cursor.execute("""
             UPDATE documents d

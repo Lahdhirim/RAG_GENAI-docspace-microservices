@@ -78,6 +78,7 @@ logger.info("DocumentConverter initialized.")
 
 
 def parse_document(relative_path: str) -> tuple[str, Path]:
+    """Convert a document to Markdown, save it in the silver folder and return it."""
     logger.info(f"Parsing document: {relative_path}")
     if not os.path.exists(relative_path):
         logger.error(f"File not found: {relative_path}")

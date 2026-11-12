@@ -16,10 +16,12 @@ logger = create_logger("synchroniser", "logs/synchroniser.log")
 
 
 def timeConvert(atime):
+    """Convert a filesystem timestamp into a datetime."""
     return datetime.fromtimestamp(atime)
 
 
 def scan_documents(directory) -> list[Document]:
+    """Recursively scan a directory and build a Document for each file found."""
     logger.info(
         f"[SCAN DOCUMENTS] Scanning documents in directory: {directory}. Time : {datetime.now()}"
     )
@@ -73,6 +75,7 @@ def scan_documents(directory) -> list[Document]:
 def insert_new_documents(
     local_documents: list[Document], db_documents: list[Document]
 ) -> tuple[dict, dict]:
+    """Insert local documents that are not yet in the database."""
     added_documents = {}
     failed_documents = {}
     logger.info("[INSERT NEW DOCUMENTS] Inserting new documents...")
@@ -116,6 +119,7 @@ def insert_new_documents(
 def mark_deleted_documents(
     local_documents: list[Document], db_documents: list[Document]
 ) -> tuple[dict, dict]:
+    """Mark database documents that no longer exist locally as absent."""
     marked_documents = {}
     failed_documents = {}
     logger.info("[MARK DOCUMENT AS DELETED] Updating absent documents...")
@@ -168,6 +172,7 @@ def mark_deleted_documents(
 def mark_present_documents(
     local_documents: list[Document], db_documents: list[Document]
 ) -> tuple[dict, dict]:
+    """Mark previously absent documents that are back on disk as present."""
     present_documents = {}
     failed_documents = {}
 
@@ -224,6 +229,7 @@ def mark_present_documents(
 
 
 def sync_documents(directory: str) -> None:
+    """Synchronize the documents table with the files found in a directory."""
     logger.info("=" * 80)
     logger.info(
         f"[SYNC DOCUMENTS] Starting document synchronization for directory: {directory}"

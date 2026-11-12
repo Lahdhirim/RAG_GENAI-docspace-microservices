@@ -25,16 +25,19 @@ database_lock = Lock()
 
 @app.get("/")
 def read_root():
+    """Return a welcome message."""
     return {"message": "Hello from doc-manager-service!"}
 
 
 @app.get("/health")
 def health_check():
+    """Return the service health status."""
     return {"status": "OK"}
 
 
 @app.get("/documents")
 def get_documents():
+    """Return all documents stored in the database."""
     with database_lock:
         documents = get_documents_query()
     return {"documents": documents}
@@ -42,6 +45,7 @@ def get_documents():
 
 @app.get("/parsing_statuses")
 def parsing_statuses():
+    """Return all parsing jobs with their document filename."""
     with database_lock:
         parsing_statuses = get_parsing_statuses_query()
     return {"statuses": parsing_statuses}
@@ -56,6 +60,7 @@ def preview_document(
     kind: Literal["original", "markdown"] = "original",
     job_id: str | None = Query(default=None, min_length=1, max_length=64),
 ):
+    """Serve the original PDF or the generated Markdown of a document for preview."""
     unavailable = (
         "This document is currently unavailable."
         if kind == "original"

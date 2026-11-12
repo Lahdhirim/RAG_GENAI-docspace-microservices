@@ -23,6 +23,7 @@ parser_service_host = "parsing_api" if env == "production" else "127.0.0.1"
 
 
 def submit_parsing_jobs(documents: list[Document]) -> tuple[dict, dict]:
+    """Send documents to the parser API and split them into submitted and failed jobs."""
     submitted_documents = {}
     failed_documents = {}
     logger.info("[SUBMIT PARSING JOBS] Submitting parsing jobs")
@@ -102,6 +103,7 @@ def submit_parsing_jobs(documents: list[Document]) -> tuple[dict, dict]:
 
 
 def get_redis_jobs_status(db_jobs: list[dict]) -> dict[str, dict]:
+    """Fetch the current status of each job from the parser API."""
     job_updates = {}
     for db_job in db_jobs:
         db_job_id = db_job.get("job_id")
@@ -126,6 +128,7 @@ def get_redis_jobs_status(db_jobs: list[dict]) -> dict[str, dict]:
 
 
 def update_jobs_status(job_updates: dict[str, dict]) -> None:
+    """Update the status of parsing jobs in the database."""
     updated_count = 0
 
     valid_statuses = {
@@ -155,6 +158,7 @@ def update_jobs_status(job_updates: dict[str, dict]) -> None:
 
         for field in ("started_at", "finished_at"):
             if job_data.get(field):
+                # MySQL DATETIME columns are timezone-naive.
                 job_data[field] = datetime.fromisoformat(
                     job_data[field].replace("Z", "+00:00")
                 ).replace(tzinfo=None)
@@ -171,6 +175,7 @@ def update_jobs_status(job_updates: dict[str, dict]) -> None:
 def update_documents_status(
     submitted_documents: dict[str, dict], failed_documents: dict[str, dict]
 ) -> None:
+    """Record submitted jobs and update the submission status of each document."""
 
     for document_id, job_data in submitted_documents.items():
         insert_parsing_job(job_data)
@@ -183,6 +188,7 @@ def update_documents_status(
 
 
 def manage_parsing_jobs():
+    """Run one parsing cycle: refresh active jobs, then submit new documents."""
     logger.info("=" * 80)
     logger.info("[PARSING JOBS] Submitting parsing jobs.")
 

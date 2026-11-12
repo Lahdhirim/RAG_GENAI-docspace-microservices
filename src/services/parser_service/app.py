@@ -31,21 +31,27 @@ logger.info("[PARSER SERVICE] Connected to Redis and initialized jobs queue.")
 
 @app.get("/")
 def read_root():
+    """Return a welcome message."""
     return {"message": "Hello from parser-service!"}
 
 
 @app.get("/health")
 def health_check():
+    """Return the service health status."""
     return {"status": "OK"}
 
 
 class JobData(BaseModel):
+    """Request body for submitting a parsing job."""
+
     document_id: str
     relative_path: str
     filename: str
 
 
 class JobResponse(BaseModel):
+    """Status and result of a parsing job."""
+
     job_id: str | None = None
     document_id: str | None = None
     filename: str | None = None
@@ -63,6 +69,7 @@ class JobResponse(BaseModel):
 
 @app.post("/submit")
 def submit_parsing_job(job_data: JobData) -> JobResponse:
+    """Enqueue a parsing job for a document if it exists on disk."""
     logger.info(
         "[PARSER SERVICE SUBMIT JOB] Received parsing job for document %s with ID %s with relative_path: %s",
         job_data.filename,
@@ -89,6 +96,7 @@ def submit_parsing_job(job_data: JobData) -> JobResponse:
         )
 
     try:
+        # Referenced by name so the API does not need to import Docling.
         job = jobs_queue.enqueue(
             "components.parse.parse_document",
             str(document_path),
@@ -134,6 +142,7 @@ def submit_parsing_job(job_data: JobData) -> JobResponse:
 
 @app.get("/job_status/{job_id}")
 def get_job_status(job_id: str) -> JobResponse:
+    """Return the status, timings and result of a parsing job from the queue."""
 
     # Fetch the job from the queue
     job = jobs_queue.fetch_job(job_id)

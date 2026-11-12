@@ -15,6 +15,7 @@ scheduler = BlockingScheduler(executors={"default": ThreadPoolExecutor(max_worke
 
 
 def run_cycle():
+    """Synchronize documents with the database, then manage parsing jobs."""
     sync_documents(f"{data_path}/bronze")
     manage_parsing_jobs()
 
