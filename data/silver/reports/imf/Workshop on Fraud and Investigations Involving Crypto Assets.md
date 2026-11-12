@@ -10,7 +10,7 @@ Workshop on Fraud and Investigations Involving Crypto Assets
 
 **MARCH 2026**
 
-Prepared By Thomas Cantens
+**Prepared By** Thomas Cantens
 
 ## PARTNERS
 

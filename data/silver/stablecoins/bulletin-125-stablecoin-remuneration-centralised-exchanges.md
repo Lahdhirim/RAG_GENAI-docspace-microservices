@@ -239,24 +239,24 @@ In addition, the impact of stablecoin adoption on financial intermediaries could
 
 ## References
 
-Adams, A, M Ibert and G Liao (2024): “What drives crypto asset prices?”, *SSRN Working Paper* .
+Adams, A, M Ibert and G Liao (2024): “What drives crypto asset prices?”, SSRN Working Paper.
 
-Ahmed, R and I Aldasoro (2026): “Are stablecoins and bank deposits substitutes?”, *Andersen Institute Working Paper* , no 04-2026.
+Ahmed, R and I Aldasoro (2026): “Are stablecoins and bank deposits substitutes?”, Andersen Institute Working Paper, no 04-2026.
 
-Aldasoro, I, J Frost and H Ito (2026): “The impact of stablecoins on the international monetary and financial system”, *BIS Papers* , no 170.
+Aldasoro, I, J Frost and H Ito (2026): “The impact of stablecoins on the international monetary and financial system”, BIS Papers, no 170.
 
-Bank for International Settlements (BIS) (2026): “Anchoring trust in money: innovation beyond stablecoins”, *Annual Economic Report 2026* , chapter III, forthcoming.
+Bank for International Settlements (BIS) (2026): “Anchoring trust in money: innovation beyond stablecoins”, Annual Economic Report 2026, chapter III, forthcoming.
 
-Barbon, A, J Barthélemy and B Nguyen (2025): “DeFi-ying the Fed? Monetary policy transmission to stablecoin rates”, *SSRN working paper* .
+Barbon, A, J Barthélemy and B Nguyen (2025): “DeFi-ying the Fed? Monetary policy transmission to stablecoin rates”, SSRN working paper.
 
-Garcia Ocampo, D (2025): “Stablecoin-related yields: some regulatory approaches”, *FSI Briefs* , no 27.
+Garcia Ocampo, D (2025): “Stablecoin-related yields: some regulatory approaches”, FSI Briefs, no 27.
 
-Garcia Ocampo, D, P Goodrich and G-P Lovicu (2026): “Cryptoasset service providers as financial intermediaries: risks and policy approaches”, *FSI Occasional Papers* , no 27.
+Garcia Ocampo, D, P Goodrich and G-P Lovicu (2026): “Cryptoasset service providers as financial intermediaries: risks and policy approaches”, FSI Occasional Papers, no 27.
 
-Goel, T, U Lewrick and I Agarwal (2026): “Making stablecoins stable(r): can regulation help?”, *BIS Working Papers* , no 1355.
+Goel, T, U Lewrick and I Agarwal (2026): “Making stablecoins stable(r): can regulation help?”, BIS Working Papers, no 1355.
 
-Gorton, G, E Klee, C Ross, S Ross and A Vardoulakis (2026): “Leverage and stablecoin pegs”, *Journal of Financial and Quantitative Analysis* , vol 61, no 1.
+Gorton, G, E Klee, C Ross, S Ross and A Vardoulakis (2026): “Leverage and stablecoin pegs”, Journal of Financial and Quantitative Analysis, vol 61, no 1.
 
-Gürkaynak, R, B Sack and J Wright (2007): “The US Treasury yield curve: 1961 to the present”, *Journal of Monetary Economics* , vol 54, no 8.
+Gürkaynak, R, B Sack and J Wright (2007): “The US Treasury yield curve: 1961 to the present”, Journal of Monetary Economics, vol 54, no 8.
 
 ⁸ Capital and liquidity regulation of stablecoin issuers may help to mitigate such spillovers. See Goel et al (2026).

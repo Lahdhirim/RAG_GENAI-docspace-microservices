@@ -46,7 +46,7 @@ The iShares Bitcoin Trust ETF is not an investment company registered under the 
 
 ## CALENDAR YEAR PERFORMANCE (%)
 
-| Year             | 2021   | 2022   | 2023   | 2024   |   2025 |
+|                  | 2021   | 2022   | 2023   | 2024   |   2025 |
 |------------------|--------|--------|--------|--------|--------|
 | **NAV**          | -      | -      | -      | -      |  -7.08 |
 | **Market Price** | -      | -      | -      | -      |  -6.41 |
@@ -54,13 +54,13 @@ The iShares Bitcoin Trust ETF is not an investment company registered under the 
 
 ## ANNUALIZED PERFORMANCE (%)
 
-| Period           |     1y | 3y   | 5y   | 10y   |   Since Inception |
+|                  |     1y | 3y   | 5y   | 10y   |   Since Inception |
 |------------------|--------|------|------|-------|-------------------|
 | **NAV**          | -26.80 | -    | -    | -     |             26.42 |
 | **Market Price** | -27.17 | -    | -    | -     |             26.37 |
 | **Benchmark**    | -26.61 | -    | -    | -     |             26.72 |
 
-*The performance quoted represents past performance and does not guarantee future results. Investment return and principal value of an investment will fluctuate so that an investor’s shares, when sold or redeemed, may be worth more or less than the original cost. Current performance may be lower or higher than the performance quoted. Performance data current to the most recent month end may be obtained by visiting*
+*The performance quoted represents past performance and does not guarantee future results. Investment return and principal value of an investment will fluctuate so that an investor's shares, when sold or redeemed, may be worth more or less than the original cost. Current performance may be lower or higher than the performance quoted. Performance data current to the most recent month end may be obtained by visiting*
 
 [*www.iShares.com*](http://www.ishares.com/)
 
@@ -122,8 +122,7 @@ Diversification may not protect against market risk or loss of principal. Shares
 
 For US: 1-800-474-2737 • ISHARES.COM
 
-5365807  
-4969899
+5365807 4969899
 
 IMPORTANT INFORMATION:
 

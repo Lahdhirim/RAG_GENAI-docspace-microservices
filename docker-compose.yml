@@ -1,9 +1,8 @@
 services:
-
   db:
-    image: mysql
+    image: mysql:26.10.0
     restart: always
-    env_file: 
+    env_file:
       - ./.env
     ports:
       - "3306:3306"
@@ -15,13 +14,14 @@ services:
       timeout: 5s
       retries: 20
       start_period: 30s
+
   admin:
-    image: phpmyadmin
+    image: phpmyadmin:5.2.3
     restart: always
     environment:
       - PMA_ARBITRARY=1
     ports:
-      - 8080:80
+      - "8080:80"
     depends_on:
       - db
 
@@ -37,14 +37,12 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command:
-    - sh
-    - -c
-    - "python -m database.tables && exec uvicorn app:app --host 0.0.0.0 --port 8000"
-    env_file: 
+    command: ["sh", "-c", "python -m database.tables && exec uvicorn app:app --host 0.0.0.0 --port 8000"]
+    env_file:
       - ./.env
     volumes:
       - ./data:/app/data
+
   doc_manager_worker:
     build:
       context: .
@@ -58,19 +56,24 @@ services:
         condition: service_healthy
       parsing_api:
         condition: service_started
-    env_file: 
+    env_file:
       - ./.env
     volumes:
       - ./data:/app/data
 
   redis:
-    image: "redis:alpine"
-    container_name: redis-service
+    image: redis:8.10.3-alpine
     restart: always
     ports:
       - "6379:6379"
     volumes:
       - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
   parsing_api:
     build:
       context: .
@@ -81,9 +84,11 @@ services:
     ports:
       - "8001:8001"
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
     volumes:
       - ./data:/app/data
+
   parsing_worker:
     build:
       context: .
@@ -91,13 +96,16 @@ services:
     restart: always
     environment:
       - ENV=production
-    env_file: 
+    env_file:
       - ./.env
+    deploy:
+      replicas: 3
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
     volumes:
       - ./data:/app/data
-  
+
   web_app:
     build:
       context: ./src/app
@@ -110,7 +118,7 @@ services:
     depends_on:
       - db
       - doc_manager_api
-      
+
 volumes:
   db-data:
   redis-data:

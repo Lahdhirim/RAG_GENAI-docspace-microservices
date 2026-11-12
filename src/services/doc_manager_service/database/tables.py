@@ -26,7 +26,9 @@ CREATE TABLE IF NOT EXISTS documents (
 
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-        ON UPDATE CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+    
+    INDEX idx_documents_to_parse (submission_status, is_parsed, is_present)
 );
 """
 try:
@@ -57,6 +59,8 @@ CREATE TABLE IF NOT EXISTS jobs (
     silver_relative_path VARCHAR(1024) NULL,
     error TEXT NULL,
 
+    INDEX idx_jobs_status (status),
+    INDEX idx_jobs_document_status (document_id, status),
     FOREIGN KEY (document_id) REFERENCES documents(id)
 );
 """

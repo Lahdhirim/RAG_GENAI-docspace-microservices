@@ -1,10 +1,8 @@
-BIS
-
 # BIS Bulletin
 
-No 108
+## No 108
 
-## Stablecoin growth – policy challenges and approaches
+### Stablecoin growth – policy challenges and approaches
 
 Iñaki Aldasoro, Matteo Aquilina, Ulf Lewrick and Sang Hyuk Lim
 
@@ -87,25 +85,17 @@ Despite promising a stable value, stablecoins have experienced episodes of high 
 
 ### A. Fiat-backing reduces, but does not eliminate, price volatility in secondary markets
 
+### B. Frequent deviations from par even for the least volatile stablecoins
+
 **Volatility,² 1 Jan 2019-30 May 2025:**
 
 - Mean
 - 10th-90th percentiles
 - Interquartile range
 
-### B. Frequent deviations from par even for the least volatile stablecoins
+**¹ Based on data availability and the classification by Kosse et al (2023), with the exception that we refer to "algorithmic" rather than "unbacked" stablecoins, to avoid confusion with unbacked cryptoassets where that term is used. Algorithmic stablecoins are those that maintain their value through algorithms that mint or burn tokens and adjust their supply based on market demand. ² Volatility is defined as the annualised standard deviation of daily returns computed on 21-trading day moving windows.**
 
-**Low price:**
-
-- Tether (red)
-- USDC (blue)
-
-**Footnotes:**
-
-1. Based on data availability and the classification by Kosse et al (2023), with the exception that we refer to "algorithmic" rather than "unbacked" stablecoins, to avoid confusion with unbacked cryptoassets where that term is used. Algorithmic stablecoins are those that maintain their value through algorithms that mint or burn tokens and adjust their supply based on market demand.
-2. Volatility is defined as the annualised standard deviation of daily returns computed on 21-trading day moving windows.
-
-**Sources:** Kosse et al (2023); CoinDesk Data; authors' calculations.
+**Sources: Kosse et al (2023); CoinDesk Data; authors' calculations.**
 
 ## Policy challenges
 
@@ -1758,32 +1748,26 @@ exposure to banks via deposit holdings, which are mandated by regulatory require
 **Stablecoins’ effects on safe asset markets and reaction to monetary policy** *  
 Graph 4*
 
-**A. Stablecoins among top buyers of T-bills in 2024, on par with MMFs¹**
+**A. Stablecoins among top buyers of T-bills in 2024, on par with MMFs¹  
+B. Stablecoin inflows can put downward pressure on T-bill yields²  
+C. Stablecoin market cap declines with tighter monetary policy³**
 
-**B. Stablecoin inflows can put downward pressure on T-bill yields²**
+<!-- image --> Graph A: Bar chart showing purchase of T-bills by jurisdictions, GMMFs, and Stablecoins in USD bn.  
+Graph B: Line chart showing three-month T-bill yield response over days with confidence intervals.  
+Graph C: Line chart showing stablecoin index response over weeks with confidence intervals. <!-- image --> <!-- image -->
 
-**C. Stablecoin market cap declines with tighter monetary policy³**
+*Legend for Graph A:*
 
-<!-- image --> Graph A: Stablecoins among top buyers of T-bills in 2024, on par with MMFs *  
-Purchase of T-bills by:*
+- Jurisdictions: Red bars
+- GMMFs: Blue bars
+- Stablecoins: Yellow bars
 
-- Jurisdictions (red)
-- GMMFs (blue)
-- Stablecoins (yellow)
+*Legend for Graphs B &amp; C:*
 
-<!-- image --> Graph B: Three-month T-bill yield response *  
-Three-month T-bill yield response:*
-
-- Estimate (black line)
-- 68% confidence interval (pink)
-- 95% confidence interval (light pink)
-
-<!-- image --> Graph C: Stablecoin index response *  
-Stablecoin index response:*
-
-- Estimate (black line)
-- 68% confidence interval (blue)
-- 90% confidence interval (light blue)
+- Estimate: Black line
+- 68% confidence interval: Pink shaded area
+- 95% confidence interval: Light pink shaded area
+- 90% confidence interval: Light blue shaded area
 
 ¹ Stablecoin T-bill purchases reflect changes in T-bill holdings for Tether and Circle from December 2023 to December 2024. GMMF = government money market fund.  
 ² Results from local projections measuring the impact of a $3.5 billion stablecoin inflow, using regressions of five-day stablecoin flows on h-day-ahead three-month T-bill yield changes. Controls include h-day-ahead and five-day T-bill, T-note and T-bond yield changes across various maturities, five-day log changes in bitcoin and ether prices, where h goes from zero to 30 days. Data cover January 2021 to March 2025. See Ahmed and Aldasoro (2025) for details.  
@@ -1797,7 +1781,7 @@ The growing integration of stablecoins with the traditional financial system, co
 
 A bespoke framework for stablecoins should reflect their multifaceted nature while building on the regulatory experience from traditional finance. This entails identifying the various functions that stablecoins perform and applying proven regulatory strategies from similar functions in traditional finance (Aquilina et al (2024)). Such an approach requires more customised strategies to address stablecoins’ unique characteristics and specific attributes, while leveraging the information provided by blockchains. For one, tracking stablecoin provenance through the network of wallets could enhance integrity regulation to combat money laundering and other unlawful activities, particularly at the interface with the regulated
 
-*BIS Bulletin*   
+BIS Bulletin  
 5
 
 financial system. Bespoke frameworks need not imply a reduction in regulatory stringency. On the contrary, since many entities within the stablecoin ecosystem operate without established safeguards, a more restrictive regime may be necessary than in traditional finance, where such safeguards are in place. International cooperation will be crucial, given the ease with which stablecoins move across borders. Importantly, the principle of technological neutrality in regulation should not be compromised, to avoid creating an uneven playing field with potentially far-reaching and lasting consequences (Awrey (2024)).

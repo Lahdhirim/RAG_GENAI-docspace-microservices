@@ -18,8 +18,7 @@ This publication is available on the BIS website ( [www.bis.org)](http://www.bis
 
 © Bank for International Settlements 2023. All rights reserved. Brief excerpts may be reproduced or translated provided the source is stated.
 
-ISSN: 2708-0420 (online)  
-ISBN: 978-92-9259-685-9 (online)
+ISSN: 2708-0420 (online) ISBN: 978-92-9259-685-9 (online)
 
 Chanelle Duley Leonardo Gambacorta Rodney Garratt Priscilla Koo Wilkens [chanelle.duley@auckland.ac.nz](mailto:chanelle.duley@auckland.ac.nz) [Leonardo.Gambacorta@bis.org](mailto:Leonardo.Gambacorta@bis.org) [Rodney.Garratt@bis.org](mailto:Rodney.Garratt@bis.org) [Priscilla.KooWilkens@bis.org](mailto:Priscilla.KooWilkens@bis.org)
 
@@ -81,9 +80,9 @@ Graph 2 provides a hypothetical example of an oracle manipulation. Building on t
 
 Graph 2
 
-The oracle problem
-
 <!-- image -->
+
+Diagram
 
 Source: Authors' elaboration.
 

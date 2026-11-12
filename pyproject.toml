@@ -1,5 +1,5 @@
 [project]
-name = "intelligent-sharepoint"
+name = "Docspace"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -24,3 +24,10 @@ members = [
 
 [tool.uv.sources]
 shared = { workspace = true }
+torch = { index = "pytorch-cpu" }
+torchvision = { index = "pytorch-cpu" }
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true

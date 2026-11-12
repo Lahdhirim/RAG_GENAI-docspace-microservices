@@ -107,33 +107,33 @@ Ownership distribution showed relative growth of investment advisors.
 
 IMF | Monetary and Capital Markets-Global Markets Analysis and Payments Infrastructure 5
 
-CRYPTO ASSETS MONITOR: Q3 2025 OCTOBER 9, 2025
+# CRYPTO ASSETS MONITOR: Q3 2025
+
+## OCTOBER 9, 2025
 
 The U.S. dominates the crypto ETP markets, followed by Switzerland and Canada.
 
-**8. Assets of Crypto Exchange-Traded Products by Country (in USD billions)**
+### 8. Assets of Crypto Exchange-Traded Products by Country (in USD billions)
 
-**9. Corporate Bitcoin Holdings by Country** Left axis: blue bars (log scale); right axis: red bars (USD billions)
+### 9. Corporate Bitcoin Holdings by Country
 
-Total assets of crypto ETPs reached USD 200 billion in August 2025, increasing by 25 percent since the beginning of the year.
+Left axis: blue bars (log scale); right axis: red bars (USD billions)
 
-With USD 168 billion in assets under management (AUM), the U.S. is the largest market for crypto ETPs, followed distantly by Switzerland (USD 11 billion) and Canada (USD 8 billion).
-
-Australia is one of the fastest-growing markets, with its ETPs increasing by 60 percent since January 2025.
+- Total assets of crypto ETPs reached USD 200 billion in August 2025, increasing by 25 percent since the beginning of the year.
+- With USD 168 billion in assets under management (AUM), the U.S. is the largest market for crypto ETPs, followed distantly by Switzerland (USD 11 billion) and Canada (USD 8 billion).
+- Australia is one of the fastest-growing markets, with its ETPs increasing by 60 percent since January 2025.
 
 Corporate Bitcoin holdings have grown substantially since their inception in 2019, with the U.S. being by far the largest host country.
 
-Corporate Bitcoin holdings—Bitcoin reserves that companies hold on their balance sheets as part of their treasury or business strategy—provide investors with indirect exposure to Bitcoin and are, in this respect, similar to Bitcoin ETFs. However, holding equity in a Bitcoin-holding company can, in some cases, offer leveraged exposure to Bitcoin, while a Bitcoin ETF gives direct, one-to-one exposure with less company-specific risk.
+- Corporate Bitcoin holdings-Bitcoin reserves that companies hold on their balance sheets as part of their treasury or business strategy-provide investors with indirect exposure to Bitcoin and are, in this respect, similar to Bitcoin ETFs. However, holding equity in a Bitcoin-holding company can, in some cases, offer leveraged exposure to Bitcoin, while a Bitcoin ETF gives direct, one-to-one exposure with less company-specific risk.
+- The approach was pioneered by Strategy (formerly MicroStrategy) in 2019, and since then a number of other companies, mostly in the U.S., have increased their corporate holdings.
+- Globally, public companies together hold around USD 120 billion in Bitcoin as of September 2025.
+- Ninety-one percent of corporate Bitcoin holdings originate from the U.S.
+- Japan, Canada, China, and France are among the top five countries with the highest levels of corporate Bitcoin ownership, albeit at levels much smaller than the U.S. (note that the scale in the chart is logarithmic).
 
-The approach was pioneered by Strategy (formerly MicroStrategy) in 2019, and since then a number of other companies, mostly in the U.S., have increased their corporate holdings.
+IMF | Monetary and Capital Markets-Global Markets Analysis and Payments Infrastructure
 
-Globally, public companies together hold around USD 120 billion in Bitcoin as of September 2025.
-
-Ninety-one percent of corporate Bitcoin holdings originate from the U.S.
-
-Japan, Canada, China, and France are among the top five countries with the highest levels of corporate Bitcoin ownership, albeit at levels much smaller than the U.S. (note that the scale in the chart is logarithmic).
-
-IMF | Monetary and Capital Markets—Global Markets Analysis and Payments Infrastructure 6
+6
 
 CRYPTO ASSETS MONITOR: Q3 2025 OCTOBER 9, 2025
 
@@ -211,28 +211,24 @@ IMF | Monetary and Capital Markets-Global Markets Analysis and Payments Infrastr
 
 10
 
-# CRYPTO ASSETS MONITOR: Q3 2025
+CRYPTO ASSETS MONITOR: Q3 2025 OCTOBER 9, 2025
 
-## OCTOBER 9, 2025
+A substantial stablecoin expansion would likely necessitate use-cases beyond the crypto space.
 
-### A substantial stablecoin expansion would likely necessitate use-cases beyond the crypto space.
-
-#### 17. Stablecoin Share in Total Crypto Market Cap (in percent)
+**17. Stablecoin Share in Total Crypto Market Cap (in percent)**
 
 - For the time being, the key role of stablecoins remains to purchase crypto assets or hold liquidity on-chain.
 - Stablecoins have fluctuated around a relatively steady share of the total crypto market since 2024.
 - A substantial increase in the adoption of stablecoins would likely require an evolution of use-cases to payments, also beyond the blockchain, remittances, and other cross-border transactions.
 
-### Novel data show that cross-border flows of stablecoins exceeded those of unbacked crypto assets since 2022.
+Novel data show that cross-border flows of stablecoins exceeded those of unbacked crypto assets since 2022.
 
-#### 18. Stablecoin Cross-Border Flows (in USD billions)
+**18. Stablecoin Cross-Border Flows (in USD billions)**
 
 - Stablecoins have been used more than other crypto assets in cross-border transactions since 2022, and the gap has widened thereafter.
 - The figures derive from IMF staff calculations on stablecoin and unbacked crypto assets' cross-border flows.
 
-IMF | Monetary and Capital Markets-Global Markets Analysis and Payments Infrastructure
-
-11
+IMF | Monetary and Capital Markets-Global Markets Analysis and Payments Infrastructure 11
 
 # CRYPTO ASSETS MONITOR: Q3 2025
 
@@ -242,14 +238,14 @@ IMF | Monetary and Capital Markets-Global Markets Analysis and Payments Infrastr
 
 #### 19. Ownership of U.S. Treasury Bills (T-bills) (in USD billions and percent)
 
-### Investments of U.S. MMFs in treasury and treasury backed repo remain at high levels.
-
-#### 20. Total U.S. MMF AUM by Asset Type (in USD billions)
-
 - Holdings of T-bills by the two largest stablecoins (USDT and USDC) grew by almost 80 percent since 2024, while other major holders, such as Money Market Funds (MMFs) recorded a modest growth in comparison.
 - Nevertheless, those stablecoins hold a small fraction (2.1 percent) of total outstanding T-bills. Meanwhile, MMFs tower over other holders (40 percent).
 - Analysts speculate that the stablecoin market could grow rapidly as regulatory clarity improves across jurisdictions. Estimates range from USD 500 billion by 2028 to more than USD 2 trillion.
 - The wide variation reflects uncertainty around the evolution of use-cases and competition from other tokenized assets including tokenized bank deposits and central bank digital currencies (CBDCs).
+
+### Investments of U.S. MMFs in treasury and treasury backed repo remain at high levels.
+
+#### 20. Total U.S. MMF AUM by Asset Type (in USD billions)
 
 - U.S. MMFs have continued to expand, absorbing much of the increase in Treasury issuance. Since 2023, when T-bill issuance rose sharply, MMFs have substantially increased their T-bill holdings, becoming the dominant holders of T-bills by volume.
 - Treasury-backed repos also represent a key asset class for MMFs. In recent years, MMFs have shifted a large share of their repo activity away from the Federal Reserve and toward the private repo market. As a result, they have become major investors in the Treasury repo market-an investment space that is also increasingly targeted by stablecoins.
