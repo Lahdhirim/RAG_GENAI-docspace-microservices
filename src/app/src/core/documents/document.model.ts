@@ -1,4 +1,4 @@
-/** Contract returned by FastAPI's Document model on feat/parser-service. */
+/** Contract returned by the Document Manager API's Document model. */
 export interface DocumentRecord {
   id: string;
   relative_path: string;

@@ -120,9 +120,11 @@ export class JobsComponent {
           this.loading.set(true);
           this.error.set("");
         }),
+        // A route change replaces any in-flight refresh to avoid stale results.
         switchMap(() =>
           forkJoin({
             jobs: this.api.list(),
+            // Keep job history visible if only document metadata is unavailable.
             documents: this.documentApi.list().pipe(catchError(() => of(null))),
           }).pipe(
             tap(({ jobs, documents }) => {

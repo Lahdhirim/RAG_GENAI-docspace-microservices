@@ -23,6 +23,11 @@ parser_service_host = "parsing_api" if env == "production" else "127.0.0.1"
 
 
 def submit_parsing_jobs(documents: list[Document]) -> tuple[dict, dict]:
+    """Submit via the parser API and return success/failure maps by document ID.
+
+    Enqueueing happens here; the caller persists the returned job references and
+    submission outcomes in SQL afterwards.
+    """
     submitted_documents = {}
     failed_documents = {}
     logger.info("[SUBMIT PARSING JOBS] Submitting parsing jobs")
@@ -102,6 +107,7 @@ def submit_parsing_jobs(documents: list[Document]) -> tuple[dict, dict]:
 
 
 def get_redis_jobs_status(db_jobs: list[dict]) -> dict[str, dict]:
+    """Poll through the parser API; UNKNOWN means polling failed, not parsing."""
     job_updates = {}
     for db_job in db_jobs:
         db_job_id = db_job.get("job_id")
@@ -153,6 +159,8 @@ def update_jobs_status(job_updates: dict[str, dict]) -> None:
             )
             continue
 
+        # SQL DATETIME stores naive values; strip the API's timezone metadata
+        # without changing the timestamp's clock fields.
         for field in ("started_at", "finished_at"):
             if job_data.get(field):
                 job_data[field] = datetime.fromisoformat(
@@ -183,30 +191,30 @@ def update_documents_status(
 
 
 def manage_parsing_jobs():
+    """Reconcile existing jobs before selecting and submitting new documents.
+
+    Only this service writes SQL. The parser API owns queue operations, so
+    enqueueing and recording a submission are separate operations.
+    """
     logger.info("=" * 80)
     logger.info("[PARSING JOBS] Submitting parsing jobs.")
 
-    # 1. Get active jobs from the database
+    # Persist completed results before checking which documents still need work.
     active_jobs = get_active_parsing_jobs()
     logger.info("[PARSING JOBS] Retrieved %d active parsing jobs.", len(active_jobs))
 
-    # 2. Get jobs status from the parser service (Redis Queue)
     redis_jobs_status = get_redis_jobs_status(db_jobs=active_jobs)
 
-    # 3. Update SQL documents and jobs tables
     update_jobs_status(redis_jobs_status)
     update_is_parsed_status()
 
-    # 4. Retrieve the list of documents that need parsing
     documents_to_parse = get_documents_to_parse()
     logger.info(
         "[PARSING JOBS] Retrieved %d documents to parse.", len(documents_to_parse)
     )
 
-    # 5. Submit parsing jobs to the parser service
     submitted_documents, failed_documents = submit_parsing_jobs(documents_to_parse)
 
-    # 6. Update SQL documents tables
     update_documents_status(submitted_documents, failed_documents)
 
     logger.info("[PARSING JOBS] Submitted documents: %s", submitted_documents)

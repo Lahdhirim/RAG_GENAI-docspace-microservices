@@ -20,6 +20,7 @@ env = os.getenv("ENV", "development")
 data_path = "/app/data" if env == "production" else "data"
 
 app = FastAPI()
+# FastAPI runs synchronous routes in threads; they share one database cursor.
 database_lock = Lock()
 
 
@@ -56,6 +57,11 @@ def preview_document(
     kind: Literal["original", "markdown"] = "original",
     job_id: str | None = Query(default=None, min_length=1, max_length=64),
 ):
+    """Resolve a PDF original or a completed job's Markdown before serving it.
+
+    Markdown can remain available after the original disappears. Supplying a
+    job ID scopes Markdown to that run rather than the latest completed run.
+    """
     unavailable = (
         "This document is currently unavailable."
         if kind == "original"
@@ -89,6 +95,7 @@ def _preview_file(
 ) -> FileResponse:
     """Serve an existing file inside its bronze/silver directory."""
     try:
+        # Resolve symlinks before checking containment in the expected data tier.
         path = path.resolve()
         if not path.is_relative_to(root.resolve()) or not path.is_file():
             raise HTTPException(status_code=404, detail=unavailable)

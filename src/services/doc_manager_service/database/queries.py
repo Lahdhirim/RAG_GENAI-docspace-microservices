@@ -181,6 +181,11 @@ def get_active_parsing_jobs() -> list[dict]:
 
 
 def update_job_status(job_id: str, job_data: dict) -> bool:
+    """Apply partial polling data only while a job is still active.
+
+    COALESCE preserves known metadata when a response omits it or supplies null;
+    the status guard prevents later polls from overwriting terminal job states.
+    """
     try:
         cursor.execute(
             """
@@ -224,6 +229,11 @@ def update_job_status(job_id: str, job_data: dict) -> bool:
 
 
 def get_documents_to_parse() -> list[Document]:
+    """Select present, nonempty documents with no previous submission or job.
+
+    Failed submissions and documents with any job history are excluded; this
+    query does not automatically retry them.
+    """
     try:
         cursor.execute("""
                 SELECT *
@@ -354,7 +364,8 @@ def get_parsing_statuses_query() -> list[tuple]:
 
         rows = cursor.fetchall()
         logger.info(f"[GET PARSING STATUSES] Fetched {len(rows)} parsing jobs.")
-        # Preserve the positional response returned by /parsing_statuses.
+        # SELECT column order is the /parsing_statuses tuple contract consumed
+        # by the frontend's parseStatusesResponse mapper.
         return [tuple(row[column] for column in cursor.column_names) for row in rows]
 
     except Exception as e:
@@ -364,6 +375,7 @@ def get_parsing_statuses_query() -> list[tuple]:
 
 
 def update_is_parsed_status() -> None:
+    """Mark parsed only after a completed job has both content and a saved path."""
     try:
         cursor.execute("""
             UPDATE documents d
@@ -390,7 +402,11 @@ def update_is_parsed_status() -> None:
 
 
 def get_markdown_path_query(document_id: str, job_id: str | None = None) -> str | None:
-    """Resolve a completed job's Markdown path without exposing arbitrary files."""
+    """Find a completed job's saved path, scoped to its document.
+
+    A job ID selects that exact run; otherwise use the most recently submitted
+    completed run that has a path. File availability is checked by the API.
+    """
     sql = """
         SELECT silver_relative_path FROM jobs
         WHERE document_id = %s AND status = 'COMPLETED'

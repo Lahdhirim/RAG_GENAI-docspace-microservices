@@ -12,6 +12,8 @@ module.exports = {
   "/documents": {
     ...apiProxy,
     bypass(request) {
+      // /documents is both an Angular route and an API endpoint; browser
+      // navigation needs the app shell while JSON requests go to the API.
       if (request.headers.accept?.includes("text/html")) return "/index.html";
       return undefined;
     },

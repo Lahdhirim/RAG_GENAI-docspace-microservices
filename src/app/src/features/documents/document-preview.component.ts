@@ -235,6 +235,8 @@ export class DocumentPreviewComponent {
       : "Markdown is not available for this document.";
   }
   load(): void {
+    // Unsubscribing cancels HTTP, but not Blob.text(); the version also prevents
+    // a previous preview's asynchronous decoding from updating the current view.
     const version = ++this.version;
     this.request?.unsubscribe();
     this.loading.set(false);
@@ -328,6 +330,7 @@ export class DocumentPreviewComponent {
     this.dialog().nativeElement.close();
   }
   private releaseUrl(): void {
+    // Release PDF blob memory whenever the preview changes or is destroyed.
     this.pdfUrl.set(null);
     if (this.objectUrl()) URL.revokeObjectURL(this.objectUrl());
     this.objectUrl.set("");
