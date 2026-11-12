@@ -1,0 +1,15 @@
+[project]
+name = "doc_manager_service"
+version = "0.1.0"
+description = "Document manager service for handling document operations"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "apscheduler>=3.11.3",
+    "dotenv>=0.9.9",
+    "fastapi>=0.162.0",
+    "mysql-connector-python>=26.10.0",
+    "uvicorn>=0.54.0",
+    "shared",
+    "requests>=2.34.2",
+]

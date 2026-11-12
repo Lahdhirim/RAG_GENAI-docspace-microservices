@@ -1,47 +1,124 @@
 services:
-
-  redis:
-    image: "redis:alpine"
-    container_name: redis-service
-    restart: always
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis-data:/data
   db:
-    image: mysql
+    image: mysql:26.10.0
     restart: always
-    env_file: 
+    env_file:
       - ./.env
     ports:
       - "3306:3306"
     volumes:
       - db-data:/var/lib/mysql
-    depends_on:
-      - redis
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=\"$${MYSQL_ROOT_PASSWORD}\" mysql -h 127.0.0.1 -u root -e 'SELECT 1'"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
   admin:
-    image: phpmyadmin
+    image: phpmyadmin:5.2.3
     restart: always
     environment:
       - PMA_ARBITRARY=1
     ports:
-      - 8080:80
+      - "8080:80"
     depends_on:
       - db
-      - redis
+
   doc_manager_api:
-    build: services/doc_manager_service
+    build:
+      context: .
+      dockerfile: src/services/doc_manager_service/Dockerfile
     restart: always
     environment:
       - ENV=production
     ports:
       - "8000:8000"
     depends_on:
-      - db
-      - redis
-    env_file: 
+      db:
+        condition: service_healthy
+    command: ["sh", "-c", "python -m database.tables && exec uvicorn app:app --host 0.0.0.0 --port 8000"]
+    env_file:
       - ./.env
-      
+    volumes:
+      - ./data:/app/data
+
+  doc_manager_worker:
+    build:
+      context: .
+      dockerfile: src/services/doc_manager_service/Dockerfile
+    restart: always
+    environment:
+      - ENV=production
+    command: ["python", "worker.py"]
+    depends_on:
+      db:
+        condition: service_healthy
+      parsing_api:
+        condition: service_started
+    env_file:
+      - ./.env
+    volumes:
+      - ./data:/app/data
+
+  redis:
+    image: redis:8.10.3-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  parsing_api:
+    build:
+      context: .
+      dockerfile: src/services/parser_service/Dockerfile.api
+    restart: always
+    environment:
+      - ENV=production
+    ports:
+      - "8001:8001"
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./data:/app/data
+
+  parsing_worker:
+    build:
+      context: .
+      dockerfile: src/services/parser_service/Dockerfile.worker
+    restart: always
+    environment:
+      - ENV=production
+    env_file:
+      - ./.env
+    deploy:
+      replicas: 3
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./data:/app/data
+
+  web_app:
+    build:
+      context: ./src/app
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "4200:4200"
+    environment:
+      - ENV=production
+    depends_on:
+      - db
+      - doc_manager_api
+
 volumes:
   db-data:
   redis-data:

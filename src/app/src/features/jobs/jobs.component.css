@@ -1,0 +1,62 @@
+.monitor-note {
+  border: 1px solid #dce7e4;
+  border-left: 3px solid #23705b;
+  background: #f0f7f4;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.monitor-note p {
+  margin: 5px 0 0;
+  color: #536b63;
+  max-width: 850px;
+}
+.document-scope {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  font-size: 12px;
+}
+.document-scope span {
+  min-width: 0;
+}
+.document-scope code {
+  overflow-wrap: anywhere;
+}
+.job-status {
+  font-weight: 600;
+}
+.status-COMPLETED {
+  background: #edf7f1;
+  color: #327858;
+}
+.status-RUNNING {
+  background: #edf3fc;
+  color: #365d95;
+}
+.status-QUEUED {
+  background: #fff7e3;
+  color: #805b14;
+}
+.status-FAILED,
+.status-NOT_FOUND {
+  background: #fff0ed;
+  color: #994833;
+}
+.status-UNKNOWN {
+  background: #f3edf9;
+  color: #775494;
+}
+.job-error {
+  white-space: pre-wrap;
+}
+@media (max-width: 520px) {
+  .document-scope {
+    align-items: start;
+    flex-direction: column;
+  }
+}
