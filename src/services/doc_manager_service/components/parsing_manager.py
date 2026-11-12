@@ -23,14 +23,7 @@ parser_service_host = "parsing_api" if env == "production" else "127.0.0.1"
 
 
 def submit_parsing_jobs(documents: list[Document]) -> tuple[dict, dict]:
-    """Submit documents to the parser API for asynchronous conversion.
-
-    Args:
-        documents: Documents selected for parsing.
-
-    Returns:
-        Queued and failed submission dictionaries, keyed by document ID.
-    """
+    """Send documents to the parser service for processing."""
     submitted_documents = {}
     failed_documents = {}
     logger.info("[SUBMIT PARSING JOBS] Submitting parsing jobs")
@@ -110,14 +103,7 @@ def submit_parsing_jobs(documents: list[Document]) -> tuple[dict, dict]:
 
 
 def get_redis_jobs_status(db_jobs: list[dict]) -> dict[str, dict]:
-    """Fetch tracked job statuses through the parser API.
-
-    Args:
-        db_jobs: SQL job records containing the job IDs to poll.
-
-    Returns:
-        Status responses keyed by job ID, with UNKNOWN for polling errors.
-    """
+    """Get the latest parsing status for each tracked job."""
     job_updates = {}
     for db_job in db_jobs:
         db_job_id = db_job.get("job_id")
@@ -142,14 +128,7 @@ def get_redis_jobs_status(db_jobs: list[dict]) -> dict[str, dict]:
 
 
 def update_jobs_status(job_updates: dict[str, dict]) -> None:
-    """Normalize polling timestamps and save supported job statuses in SQL.
-
-    Args:
-        job_updates: Responses keyed by job ID; timestamps are converted in place.
-
-    Returns:
-        None.
-    """
+    """Save parsing job updates in the database."""
     updated_count = 0
 
     valid_statuses = {
@@ -195,15 +174,7 @@ def update_jobs_status(job_updates: dict[str, dict]) -> None:
 def update_documents_status(
     submitted_documents: dict[str, dict], failed_documents: dict[str, dict]
 ) -> None:
-    """Persist queued jobs and update document submission outcomes in SQL.
-
-    Args:
-        submitted_documents: Queued job details keyed by document ID.
-        failed_documents: Submission failures keyed by document ID.
-
-    Returns:
-        None.
-    """
+    """Save job submissions and update document statuses."""
 
     for document_id, job_data in submitted_documents.items():
         insert_parsing_job(job_data)
@@ -216,11 +187,7 @@ def update_documents_status(
 
 
 def manage_parsing_jobs():
-    """Update tracked jobs, submit eligible documents, and persist the outcomes.
-
-    Returns:
-        None.
-    """
+    """Track parsing progress and submit documents that need processing."""
     logger.info("=" * 80)
     logger.info("[PARSING JOBS] Submitting parsing jobs.")
 

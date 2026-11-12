@@ -234,7 +234,7 @@ export class DocumentPreviewComponent {
       ? "This document is currently unavailable."
       : "Markdown is not available for this document.";
   }
-  /** Fetch the selected preview and update its loading and error state. */
+  /** Load the selected document preview. */
   load(): void {
     const version = ++this.version;
     this.request?.unsubscribe();
@@ -284,12 +284,7 @@ export class DocumentPreviewComponent {
         },
       });
   }
-  /**
-   * Display a PDF or decode Markdown for the current preview request.
-   * @param blob - File returned by the preview API.
-   * @param version - Load version used to ignore stale results.
-   * @returns A promise resolved after processing the preview.
-   */
+  /** Display the document as a PDF or Markdown preview. */
   private async show(blob: Blob, version: number): Promise<void> {
     if (this.disposed || version !== this.version) return;
     if (blob.size > 50 * 1024 * 1024) {
@@ -304,6 +299,7 @@ export class DocumentPreviewComponent {
     ) {
       try {
         const text = await blob.text();
+        // Ignore the result if another preview was opened while reading the file.
         if (!this.disposed && version === this.version) {
           this.text.set(text);
           this.markdown.set(renderMarkdown(text));

@@ -78,14 +78,7 @@ logger.info("DocumentConverter initialized.")
 
 
 def parse_document(relative_path: str) -> tuple[str, Path]:
-    """Convert a bronze PDF into a saved Markdown file.
-
-    Args:
-        relative_path: Source PDF path under the bronze directory.
-
-    Returns:
-        Markdown content and the saved file path.
-    """
+    """Convert a document into a saved Markdown file."""
     logger.info(f"Parsing document: {relative_path}")
     if not os.path.exists(relative_path):
         logger.error(f"File not found: {relative_path}")

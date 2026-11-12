@@ -19,11 +19,7 @@ export interface DocumentRecord {
 export interface DocumentsResponse {
   documents: DocumentRecord[];
 }
-/**
- * Validate the document list response before it is used by the interface.
- * @param value - Untrusted API response.
- * @returns Whether the value matches the document list contract.
- */
+/** Check that the API response contains valid document data. */
 export function isDocumentsResponse(
   value: unknown,
 ): value is DocumentsResponse {

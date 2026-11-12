@@ -56,16 +56,7 @@ def preview_document(
     kind: Literal["original", "markdown"] = "original",
     job_id: str | None = Query(default=None, min_length=1, max_length=64),
 ):
-    """Serve the original PDF or a completed job's Markdown for a document.
-
-    Args:
-        document_id: ID of the document to preview.
-        kind: Preview type: original or markdown.
-        job_id: Markdown run to use; None selects the latest completed run.
-
-    Returns:
-        An inline response containing the requested file.
-    """
+    """Serve a preview of the original document or its Markdown version."""
     unavailable = (
         "This document is currently unavailable."
         if kind == "original"
@@ -97,18 +88,7 @@ def preview_document(
 def _preview_file(
     path: Path, root: Path, extension: str, media_type: str, unavailable: str
 ) -> FileResponse:
-    """Serve an existing file inside its bronze/silver directory.
-
-    Args:
-        path: File to serve.
-        root: Directory the resolved file must remain inside.
-        extension: Allowed file extension, including the leading dot.
-        media_type: MIME type of the response.
-        unavailable: Error message for a missing or inaccessible file.
-
-    Returns:
-        An inline file response after path, type, and size checks.
-    """
+    """Serve an existing file inside its bronze/silver directory."""
     try:
         path = path.resolve()
         if not path.is_relative_to(root.resolve()) or not path.is_file():

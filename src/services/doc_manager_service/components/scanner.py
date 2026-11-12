@@ -20,14 +20,7 @@ def timeConvert(atime):
 
 
 def scan_documents(directory) -> list[Document]:
-    """Scan files recursively and identify each document by its path and content.
-
-    Args:
-        directory: Root directory containing the source documents.
-
-    Returns:
-        Documents with filesystem metadata and content hashes.
-    """
+    """Scan a directory and collect information about its documents."""
     logger.info(
         f"[SCAN DOCUMENTS] Scanning documents in directory: {directory}. Time : {datetime.now()}"
     )
@@ -81,15 +74,7 @@ def scan_documents(directory) -> list[Document]:
 def insert_new_documents(
     local_documents: list[Document], db_documents: list[Document]
 ) -> tuple[dict, dict]:
-    """Insert scanned documents whose IDs are absent from the database.
-
-    Args:
-        local_documents: Documents found by the filesystem scan.
-        db_documents: Documents already recorded in SQL.
-
-    Returns:
-        Added and failed document dictionaries, keyed by document ID.
-    """
+    """Add newly discovered documents to the database."""
     added_documents = {}
     failed_documents = {}
     logger.info("[INSERT NEW DOCUMENTS] Inserting new documents...")
@@ -133,15 +118,7 @@ def insert_new_documents(
 def mark_deleted_documents(
     local_documents: list[Document], db_documents: list[Document]
 ) -> tuple[dict, dict]:
-    """Mark missing documents as absent without deleting their SQL records.
-
-    Args:
-        local_documents: Documents found by the filesystem scan.
-        db_documents: Documents already recorded in SQL.
-
-    Returns:
-        Updated and failed document dictionaries, keyed by document ID.
-    """
+    """Mark documents as absent when they are no longer found."""
     marked_documents = {}
     failed_documents = {}
     logger.info("[MARK DOCUMENT AS DELETED] Updating absent documents...")
@@ -194,15 +171,7 @@ def mark_deleted_documents(
 def mark_present_documents(
     local_documents: list[Document], db_documents: list[Document]
 ) -> tuple[dict, dict]:
-    """Restore the presence flag for previously absent documents found again.
-
-    Args:
-        local_documents: Documents found by the filesystem scan.
-        db_documents: Documents already recorded in SQL.
-
-    Returns:
-        Restored and failed document dictionaries, keyed by document ID.
-    """
+    """Mark previously absent documents as present when they reappear."""
     present_documents = {}
     failed_documents = {}
 
@@ -259,14 +228,7 @@ def mark_present_documents(
 
 
 def sync_documents(directory: str) -> None:
-    """Synchronize scanned documents with SQL by adding or updating their presence.
-
-    Args:
-        directory: Root directory containing the source documents.
-
-    Returns:
-        None.
-    """
+    """Update the database to reflect the documents found on disk."""
     logger.info("=" * 80)
     logger.info(
         f"[SYNC DOCUMENTS] Starting document synchronization for directory: {directory}"

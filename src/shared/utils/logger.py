@@ -3,16 +3,7 @@ import os
 
 
 def create_logger(name: str, log_file: str, propagate: bool = True) -> logging.Logger:
-    """Create and configure a logger writing to a specific file.
-
-    Args:
-        name: Logger name used to find or create the instance.
-        log_file: Output file used when the logger has no handlers.
-        propagate: Whether records propagate to parent loggers on initial setup.
-
-    Returns:
-        The named logger with its existing or newly configured handlers.
-    """
+    """Create and configure a logger writing to a specific file."""
 
     logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)

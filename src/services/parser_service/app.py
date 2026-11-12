@@ -63,14 +63,7 @@ class JobResponse(BaseModel):
 
 @app.post("/submit")
 def submit_parsing_job(job_data: JobData) -> JobResponse:
-    """Check the source file and enqueue a document conversion job.
-
-    Args:
-        job_data: Document ID, source path relative to bronze, and filename.
-
-    Returns:
-        Queued job details or a failed submission with its error.
-    """
+    """Check that the document exists and queue it for parsing."""
     logger.info(
         "[PARSER SERVICE SUBMIT JOB] Received parsing job for document %s with ID %s with relative_path: %s",
         job_data.filename,
@@ -97,6 +90,7 @@ def submit_parsing_job(job_data: JobData) -> JobResponse:
         )
 
     try:
+        # Load the converter in the worker rather than in the API process.
         job = jobs_queue.enqueue(
             "components.parse.parse_document",
             str(document_path),
@@ -142,14 +136,7 @@ def submit_parsing_job(job_data: JobData) -> JobResponse:
 
 @app.get("/job_status/{job_id}")
 def get_job_status(job_id: str) -> JobResponse:
-    """Translate an RQ job's state and conversion result into an API response.
-
-    Args:
-        job_id: ID of the job to look up in Redis.
-
-    Returns:
-        Job status, timings, result, and error details, or NOT_FOUND if missing.
-    """
+    """Get a parsing job's status and results."""
 
     # Fetch the job from the queue
     job = jobs_queue.fetch_job(job_id)

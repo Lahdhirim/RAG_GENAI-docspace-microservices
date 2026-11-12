@@ -181,16 +181,9 @@ def get_active_parsing_jobs() -> list[dict]:
 
 
 def update_job_status(job_id: str, job_data: dict) -> bool:
-    """Apply partial status updates to an active job while preserving known values.
-
-    Args:
-        job_id: ID of the queued, running, or unknown job to update.
-        job_data: New status and optional timing, result, or error fields.
-
-    Returns:
-        True if the SQL update changed a row, otherwise False.
-    """
+    """Update an active parsing job with the latest available information."""
     try:
+        # Keep saved values when a status response omits them.
         cursor.execute(
             """
             UPDATE jobs
@@ -233,11 +226,7 @@ def update_job_status(job_id: str, job_data: dict) -> bool:
 
 
 def get_documents_to_parse() -> list[Document]:
-    """Find documents eligible for their first parsing submission.
-
-    Returns:
-        Present, nonempty, unparsed documents with no submission or job history.
-    """
+    """Find documents that are ready to be parsed."""
     try:
         cursor.execute("""
                 SELECT *
@@ -378,11 +367,7 @@ def get_parsing_statuses_query() -> list[tuple]:
 
 
 def update_is_parsed_status() -> None:
-    """Mark documents as parsed when a completed job has content and a saved path.
-
-    Returns:
-        None.
-    """
+    """Mark documents as parsed once their results have been saved."""
     try:
         cursor.execute("""
             UPDATE documents d
@@ -409,15 +394,7 @@ def update_is_parsed_status() -> None:
 
 
 def get_markdown_path_query(document_id: str, job_id: str | None = None) -> str | None:
-    """Resolve a completed job's Markdown path without exposing arbitrary files.
-
-    Args:
-        document_id: ID of the document whose Markdown is requested.
-        job_id: Specific run to use; None selects the latest completed run.
-
-    Returns:
-        The saved Markdown path, or None when no matching result exists.
-    """
+    """Resolve a completed job's Markdown path without exposing arbitrary files."""
     sql = """
         SELECT silver_relative_path FROM jobs
         WHERE document_id = %s AND status = 'COMPLETED'
