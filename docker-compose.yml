@@ -105,6 +105,21 @@ services:
         condition: service_healthy
     volumes:
       - ./data:/app/data
+    
+  neo4j:
+    image: neo4j:5.26.33
+    restart: always
+    environment:
+      - NEO4J_AUTH=neo4j/$GRAPH_DATABASE_PASSWORD
+      - NEO4J_PLUGINS=["apoc", "graph-data-science"]
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*,gds.*
+      - NEO4J_dbms_security_procedures_allowlist=apoc.*,gds.*
+    ports:
+      - "7687:7687" # Bolt
+      - "7474:7474" # HTTP
+    volumes:
+      - neo4j-data:/data
+      - neo4j_logs:/logs
 
   web_app:
     build:
@@ -122,3 +137,5 @@ services:
 volumes:
   db-data:
   redis-data:
+  neo4j-data:
+  neo4j_logs:

@@ -10,5 +10,5 @@ dependencies = [
     "uvicorn>=0.54.0",
     "shared",
     "openai>=2.0.0",
-    "cognee>=1.6.7",
+    "cognee[neo4j]>=1.6.7",
 ]
