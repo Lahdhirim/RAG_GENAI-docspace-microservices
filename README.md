@@ -37,6 +37,8 @@ This separation also keeps the API lightweight, while the heavier Docling depend
     <img src="assets/parsing_jobs.png" alt="CV" width="950", height="550"/>
 </div>
 
+## Graph-RAG Service (Cognee, OpenRouter)
+
 ## Frontend Application (Codex)
 The frontend is an Angular and TypeScript application designed to provide a modern interface for document management.
 
