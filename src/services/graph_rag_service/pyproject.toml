@@ -1,0 +1,14 @@
+[project]
+name = "graph_rag_service"
+version = "0.1.0"
+description = "Graph RAG service for handling graph-based retrieval-augmented generation operations"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "dotenv>=0.9.9",
+    "fastapi>=0.162.0",
+    "uvicorn>=0.54.0",
+    "shared",
+    "openai>=2.0.0",
+    "cognee>=1.6.7",
+]

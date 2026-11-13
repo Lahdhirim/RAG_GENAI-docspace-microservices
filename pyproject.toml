@@ -1,7 +1,7 @@
 [project]
 name = "Docspace"
 version = "0.1.0"
-description = "Add your description here"
+description = "Docspace project for managing document-related services"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -11,6 +11,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "black>=26.3.1",
+    "ipykernel>=7.4.0",
     "pre-commit>=4.5.1",
     "ruff>=0.15.6",
 ]
@@ -19,6 +20,7 @@ dev = [
 members = [
     "src/services/parser_service",
     "src/services/doc_manager_service",
+    "src/services/graph_rag_service",
     "src/shared"
 ]
 
