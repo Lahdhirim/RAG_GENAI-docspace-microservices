@@ -40,6 +40,13 @@ This separation also keeps the API lightweight, while the heavier Docling depend
 ## Graph-RAG Service (Cognee, OpenRouter, Neo4j)
 Available soon. This service will leverage Cognee and OpenRouter for processing, and Neo4j for graph-based storage and retrieval of document relationships.
 
+### Interactive Graph-RAG
+<div style="text-align: center;">
+    <img src="assets/graph.png" alt="CV" width="950", height="550"/>
+</div>
+
+Available at the following URL: [Interactive Graph](https://lahdhirim.github.io/RAG_GENAI-docspace-microservices/graph.html)
+
 ## AI-Agents Service
 Available soon. This service will leverage AI agents to automate workflows, interact with the document management system, and perform tasks based on user instructions.
 
