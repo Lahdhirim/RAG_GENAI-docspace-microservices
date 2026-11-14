@@ -1,8 +1,8 @@
 # Docspace: Document Management Platform (Under Construction 🚧)
 Docspace is a document management platform built with Python, Angular, and Docker. Its independent microservices synchronize documents, convert PDFs into Markdown, and build Neo4j knowledge graphs with Cognee, enabling document previews and GraphRAG question answering.
 
-The idea is simple: upload and manage documents, automatically parse their content, and make the results available through a web interface. The backend is built with Python and FastAPI, while Docker and Kubernetes are used to manage the different services and scale the parsing workers.
-
+The idea is simple: upload and manage documents, automatically parse their content, and make the extracted information available for search, preview, and question answering through a web interface. The backend is built with Python and FastAPI, while Docker and Kubernetes are used to manage the different services and scale the parsing workers.
+ 
 ## Document Manager Service (MySQL and APScheduler)
 The Document Manager is responsible for keeping track of documents and their processing status.
 
