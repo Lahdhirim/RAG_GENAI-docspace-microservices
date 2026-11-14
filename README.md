@@ -1,4 +1,4 @@
-# Docspace: Document Management Platform
+# Docspace: Document Management Platform (Under Construction 🚧)
 Docspace is a personal project I'm building to explore document processing, microservices, and container orchestration.
 
 The idea is simple: upload and manage documents, automatically parse their content, and make the results available through a web interface. The backend is built with Python and FastAPI, while Docker and Kubernetes are used to manage the different services and scale the parsing workers.
@@ -36,6 +36,12 @@ This separation also keeps the API lightweight, while the heavier Docling depend
 <div style="text-align: center;">
     <img src="assets/parsing_jobs.png" alt="CV" width="950", height="550"/>
 </div>
+
+## Graph-RAG Service (Cognee, OpenRouter, Neo4j)
+Available soon. This service will leverage Cognee and OpenRouter for processing, and Neo4j for graph-based storage and retrieval of document relationships.
+
+## AI-Agents Service
+Available soon. This service will leverage AI agents to automate workflows, interact with the document management system, and perform tasks based on user instructions.
 
 ## Frontend Application (Codex)
 The frontend is an Angular and TypeScript application designed to provide a modern interface for document management.
@@ -123,5 +129,6 @@ Previously completed parsing results remain available, so unchanged documents do
 
 > **Warning:** `docker compose down -v` deletes the named volumes, including the database and Redis data. Your local `data/` directory remains intact, but losing the database records can cause documents to be parsed again.
 
-### Running the Project (Locally with Kubernetes Clusters)
+### Running the Project (Kubernetes Clusters)
+Available soon. Instructions for deploying the project on Kubernetes clusters will be provided here. This will include setting up the necessary Kubernetes resources, configuring persistent storage, and managing the application lifecycle within a cluster environment.
 
