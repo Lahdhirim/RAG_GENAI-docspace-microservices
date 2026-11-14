@@ -1,113 +1,93 @@
-import logging
 import os
 from datetime import UTC, datetime
 
 import requests
-from database.ingestion_queries import (
+from database.queries import (
     get_active_ingestion_jobs,
     get_documents_to_ingest,
-    record_ingestion_poll_error,
     reserve_ingestion_job,
     update_ingestion_job,
 )
+from utils.logger import create_logger
 
-logger = logging.getLogger("ingestion_jobs")
-service_host = (
-    "host.docker.internal" if os.getenv("ENV") == "production" else "127.0.0.1"
-)
-service_url = os.getenv("GRAPH_RAG_SERVICE_URL", f"http://{service_host}:8002").rstrip(
-    "/"
-)
-REMOTE_STATUSES = {"QUEUED", "RUNNING", "COMPLETED", "FAILED"}
+logger = create_logger("ingestion_jobs", "logs/ingestion_jobs.log")
+service_url = os.getenv("GRAPH_RAG_SERVICE_URL", "http://localhost:8002").rstrip("/")
 
 
-def _save_response(job: dict, response: requests.Response) -> None:
-    """Validate that the graph service answered for the expected ingestion job."""
-    response.raise_for_status()
-    data = response.json()
-    if (
-        data.get("job_id") != job["job_id"]
-        or data.get("document_ids") != [job["document_id"]]
-        or data.get("status") not in REMOTE_STATUSES
-    ):
-        raise ValueError("The graph service returned an unexpected ingestion job.")
-    update_ingestion_job(job["job_id"], data)
-
-
-def _fail_job(job: dict, message: str) -> None:
-    """Finish an ingestion attempt that cannot be resumed safely."""
-    update_ingestion_job(
-        job["job_id"],
-        {
-            "status": "FAILED",
-            "finished_at": datetime.now(UTC).isoformat(),
-            "error": message,
-        },
-    )
-
-
-def _submit_job(job: dict) -> None:
-    """Submit a reserved job using the Markdown already stored by Document Manager."""
+def submit_ingestion_job(job: dict) -> dict:
+    """Submit a reserved document to the graph service for ingestion."""
     response = requests.post(
         f"{service_url}/ingest",
         json={
             "job_id": job["job_id"],
+            "document_id": job["document_id"],
+            "version": job["parser_job_id"],
+            "filename": f"{job['file_name']}{job['extension']}",
+            "content": job["content"],
             "dataset": job["dataset"],
-            "documents": [
-                {
-                    "document_id": job["document_id"],
-                    "content": job["content"],
-                    "filename": f"{job['file_name']}{job['extension']}",
-                    "version": job["parser_job_id"],
-                }
-            ],
         },
         timeout=10,
     )
-    if 400 <= response.status_code < 500 and response.status_code not in {408, 429}:
-        _fail_job(job, f"The graph service rejected this ingestion: {response.text}")
-        return
-    _save_response(job, response)
+    response.raise_for_status()
+    return response.json()
 
 
-def _refresh_job(job: dict) -> None:
-    """Recover pending submissions or refresh the status of an accepted job."""
-    try:
-        response = requests.get(f"{service_url}/job_status/{job['job_id']}", timeout=10)
-        if response.status_code == 404:
-            if job["status"] == "PENDING":
-                # Reuse the reserved ID when a submission response was lost.
-                _submit_job(job)
+def get_ingestion_jobs_status(jobs: list[dict]) -> dict[str, dict]:
+    """Fetch ingestion statuses and recover submissions whose responses were lost."""
+    updates = {}
+    for job in jobs:
+        job_id = job["job_id"]
+        try:
+            response = requests.get(f"{service_url}/job_status/{job_id}", timeout=10)
+            if response.status_code == 404 and job["status"] == "PENDING":
+                # Resubmit the reserved ID so a lost response cannot create another job.
+                data = submit_ingestion_job(job)
+            elif response.status_code == 404:
+                data = {
+                    "job_id": job_id,
+                    "document_id": job["document_id"],
+                    "status": "FAILED",
+                    "error": "The graph service no longer has this ingestion job.",
+                    "finished_at": datetime.now(UTC).isoformat(),
+                }
             else:
-                _fail_job(job, "The graph service no longer has this ingestion job.")
-            return
-        _save_response(job, response)
-    except (requests.RequestException, ValueError, TypeError, AttributeError) as error:
-        record_ingestion_poll_error(job["job_id"], str(error))
-        logger.warning("Cannot refresh ingestion job %s: %s", job["job_id"], error)
+                response.raise_for_status()
+                data = response.json()
+            if data.get("status") not in {"QUEUED", "RUNNING", "COMPLETED", "FAILED"}:
+                raise ValueError("The graph service returned an invalid job status.")
+            if (
+                data.get("job_id") != job_id
+                or data.get("document_id") != job["document_id"]
+            ):
+                raise ValueError(
+                    "The graph service returned a different ingestion job."
+                )
+            updates[job_id] = data
+        except (requests.RequestException, ValueError) as error:
+            status = job["status"]
+            if (
+                isinstance(error, requests.HTTPError)
+                and 400 <= error.response.status_code < 500
+                and error.response.status_code not in {408, 429}
+            ):
+                status = "FAILED"
+            updates[job_id] = {"status": status, "error": str(error)}
+            if status == "FAILED":
+                updates[job_id]["finished_at"] = datetime.now(UTC).isoformat()
+            logger.warning("Cannot refresh ingestion job %s: %s", job_id, error)
+    return updates
 
 
 def manage_ingestion_jobs() -> None:
-    """Refresh ingestion jobs and submit one parsed document when the queue is free."""
+    """Refresh the active ingestion or submit the next parsed document."""
     try:
-        active_jobs = get_active_ingestion_jobs()
-        try:
-            response = requests.get(f"{service_url}/health", timeout=3)
-            response.raise_for_status()
-        except requests.RequestException as error:
-            for job in active_jobs:
-                record_ingestion_poll_error(job["job_id"], str(error))
-            logger.warning("The graph service is unavailable: %s", error)
-            return
-
-        for job in active_jobs:
-            _refresh_job(job)
-        if get_active_ingestion_jobs():
-            return
-
-        for document in get_documents_to_ingest():
-            # Commit the reservation before the service can start expensive work.
-            job = reserve_ingestion_job(document)
-            _refresh_job(job)
+        jobs = get_active_ingestion_jobs()
+        if not jobs:
+            documents = get_documents_to_ingest()
+            if documents:
+                # Save the job before the graph service starts processing its content.
+                jobs = [reserve_ingestion_job(documents[0])]
+        for job_id, data in get_ingestion_jobs_status(jobs[:1]).items():
+            update_ingestion_job(job_id, data)
     except Exception:
         logger.exception("Could not complete this ingestion cycle.")

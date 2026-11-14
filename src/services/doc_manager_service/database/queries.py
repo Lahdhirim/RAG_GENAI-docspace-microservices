@@ -1,11 +1,14 @@
 import logging
+import os
+from datetime import UTC, datetime
+from uuid import uuid4
 
 from database.connection import connection
-from database.ingestion_queries import DATASET, DOCUMENT_INGESTION_STATE
 from models.document import Document
 
 logger = logging.getLogger("database")
 cursor = connection.cursor(dictionary=True)
+dataset = os.getenv("GRAPH_RAG_DATASET", "docspace")
 
 
 ##################################################### Document Queries ###############################################
@@ -91,7 +94,21 @@ def get_documents_query() -> list[Document]:
     """Return all documents from the database."""
     try:
         cursor.execute(
-            f"SELECT d.*, {DOCUMENT_INGESTION_STATE} FROM documents d", (DATASET,)
+            """
+            SELECT d.*, EXISTS (
+                SELECT 1 FROM ingestion_jobs i
+                WHERE i.document_id = d.id AND i.dataset = %s
+                  AND i.status = 'COMPLETED' AND i.parser_job_id = (
+                      SELECT j.job_id FROM jobs j
+                      WHERE j.document_id = d.id AND j.status = 'COMPLETED'
+                        AND j.content IS NOT NULL AND TRIM(j.content) <> ''
+                        AND j.silver_relative_path IS NOT NULL
+                      ORDER BY j.submitted_at DESC, j.job_id DESC LIMIT 1
+                  )
+            ) AS is_ingested
+            FROM documents d
+            """,
+            (dataset,),
         )
         rows = cursor.fetchall()
         documents = []
@@ -128,8 +145,21 @@ def get_document_query(document_id: str) -> Document | None:
     """Return a document by its ID."""
     try:
         cursor.execute(
-            f"SELECT d.*, {DOCUMENT_INGESTION_STATE} FROM documents d WHERE d.id = %s",
-            (DATASET, document_id),
+            """
+            SELECT d.*, EXISTS (
+                SELECT 1 FROM ingestion_jobs i
+                WHERE i.document_id = d.id AND i.dataset = %s
+                  AND i.status = 'COMPLETED' AND i.parser_job_id = (
+                      SELECT j.job_id FROM jobs j
+                      WHERE j.document_id = d.id AND j.status = 'COMPLETED'
+                        AND j.content IS NOT NULL AND TRIM(j.content) <> ''
+                        AND j.silver_relative_path IS NOT NULL
+                      ORDER BY j.submitted_at DESC, j.job_id DESC LIMIT 1
+                  )
+            ) AS is_ingested
+            FROM documents d WHERE d.id = %s
+            """,
+            (dataset, document_id),
         )
         row = cursor.fetchone()
         if row:
@@ -429,3 +459,150 @@ def get_markdown_path_query(document_id: str, job_id: str | None = None) -> str 
         logger.exception("[PREVIEW] Could not read Markdown path")
         connection.rollback()
         raise
+
+
+##################################################### Ingestion Queries ###############################################
+def get_documents_to_ingest() -> list[dict]:
+    """Find the next parsed document that has not been submitted for ingestion."""
+    cursor.execute(
+        """
+        SELECT d.id AS document_id, d.file_name, d.extension,
+               j.job_id AS parser_job_id, j.content
+        FROM documents d JOIN jobs j ON j.document_id = d.id
+        WHERE d.is_present = TRUE AND d.is_parsed = TRUE
+          AND j.job_id = (
+              SELECT latest.job_id FROM jobs latest
+              WHERE latest.document_id = d.id AND latest.status = 'COMPLETED'
+                AND latest.content IS NOT NULL AND TRIM(latest.content) <> ''
+                AND latest.silver_relative_path IS NOT NULL
+              ORDER BY latest.submitted_at DESC, latest.job_id DESC LIMIT 1
+          )
+          AND NOT EXISTS (
+              SELECT 1 FROM ingestion_jobs i
+              WHERE i.document_id = d.id AND i.parser_job_id = j.job_id
+                AND i.dataset = %s
+          )
+        ORDER BY j.submitted_at, j.job_id LIMIT 1
+        """,
+        (dataset,),
+    )
+    return cursor.fetchall()
+
+
+def get_active_ingestion_jobs() -> list[dict]:
+    """Return ingestion jobs waiting for submission or completion."""
+    cursor.execute(
+        """
+        SELECT i.*, d.file_name, d.extension, j.content
+        FROM ingestion_jobs i
+        JOIN documents d ON d.id = i.document_id
+        JOIN jobs j ON j.job_id = i.parser_job_id
+        WHERE i.dataset = %s AND i.status IN ('PENDING', 'QUEUED', 'RUNNING')
+        ORDER BY i.submitted_at, i.job_id
+        """,
+        (dataset,),
+    )
+    return cursor.fetchall()
+
+
+def reserve_ingestion_job(document: dict, attempt: int = 1) -> dict:
+    """Save a pending ingestion job before sending its Markdown to the graph service."""
+    cursor.execute(
+        """
+        INSERT INTO ingestion_jobs
+            (job_id, document_id, parser_job_id, dataset, attempt, status)
+        VALUES (%s, %s, %s, %s, %s, 'PENDING')
+        ON DUPLICATE KEY UPDATE job_id = job_id
+        """,
+        (
+            str(uuid4()),
+            document["document_id"],
+            document["parser_job_id"],
+            dataset,
+            attempt,
+        ),
+    )
+    connection.commit()
+    cursor.execute(
+        """
+        SELECT job_id, status FROM ingestion_jobs
+        WHERE document_id = %s AND parser_job_id = %s AND dataset = %s AND attempt = %s
+        """,
+        (document["document_id"], document["parser_job_id"], dataset, attempt),
+    )
+    return {**document, **cursor.fetchone(), "dataset": dataset}
+
+
+def update_ingestion_job(job_id: str, job_data: dict) -> None:
+    """Update an unfinished ingestion job with the status returned by the graph service."""
+    dates = {}
+    for field in ("started_at", "finished_at"):
+        value = job_data.get(field)
+        dates[field] = (
+            datetime.fromisoformat(value).astimezone(UTC).replace(tzinfo=None)
+            if value
+            else None
+        )
+    cursor.execute(
+        """
+        UPDATE ingestion_jobs
+        SET status = %s, started_at = COALESCE(%s, started_at),
+            finished_at = COALESCE(%s, finished_at), error = %s
+        WHERE job_id = %s AND status IN ('PENDING', 'QUEUED', 'RUNNING')
+        """,
+        (
+            job_data["status"],
+            dates["started_at"],
+            dates["finished_at"],
+            job_data.get("error"),
+            job_id,
+        ),
+    )
+    connection.commit()
+
+
+def get_ingestion_statuses_query() -> list[dict]:
+    """Return ingestion jobs with their document names and errors."""
+    cursor.execute(
+        """
+        SELECT i.*, d.file_name AS filename
+        FROM ingestion_jobs i JOIN documents d ON d.id = i.document_id
+        WHERE i.dataset = %s ORDER BY i.submitted_at DESC, i.attempt DESC
+        """,
+        (dataset,),
+    )
+    return cursor.fetchall()
+
+
+def retry_document_ingestion(document_id: str) -> dict:
+    """Reserve another attempt for a document whose latest ingestion failed."""
+    if get_active_ingestion_jobs():
+        raise ValueError("Wait for the active ingestion to finish before retrying.")
+    cursor.execute(
+        """
+        SELECT i.*, d.file_name, d.extension, j.content
+        FROM ingestion_jobs i
+        JOIN documents d ON d.id = i.document_id
+        JOIN jobs j ON j.job_id = i.parser_job_id
+        WHERE i.document_id = %s AND i.dataset = %s AND d.is_present = TRUE
+          AND i.parser_job_id = (
+              SELECT latest.job_id FROM jobs latest
+              WHERE latest.document_id = d.id AND latest.status = 'COMPLETED'
+                AND latest.content IS NOT NULL AND TRIM(latest.content) <> ''
+                AND latest.silver_relative_path IS NOT NULL
+              ORDER BY latest.submitted_at DESC, latest.job_id DESC LIMIT 1
+          )
+        ORDER BY i.attempt DESC LIMIT 1
+        """,
+        (document_id, dataset),
+    )
+    previous = cursor.fetchone()
+    if previous is None or previous["status"] != "FAILED":
+        raise ValueError(
+            "Only a failed ingestion of the current document version can be retried."
+        )
+    job = reserve_ingestion_job(previous, previous["attempt"] + 1)
+    return {
+        key: job[key]
+        for key in ("job_id", "document_id", "parser_job_id", "dataset", "status")
+    }

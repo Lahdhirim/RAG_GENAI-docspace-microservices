@@ -3,15 +3,13 @@ from pathlib import Path
 from threading import Lock
 from typing import Literal
 
-from database.ingestion_queries import (
-    get_ingestion_statuses_query,
-    retry_document_ingestion,
-)
 from database.queries import (
     get_document_query,
     get_documents_query,
+    get_ingestion_statuses_query,
     get_markdown_path_query,
     get_parsing_statuses_query,
+    retry_document_ingestion,
 )
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query

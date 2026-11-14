@@ -11,5 +11,4 @@ dependencies = [
     "shared",
     "openai>=2.0.0",
     "cognee[neo4j]>=1.6.7",
-    "filelock>=3.20.0",
 ]
