@@ -28,5 +28,6 @@ class Document(BaseModel):
     submission_error: str | None = None
     is_present: bool = True
     is_parsed: bool = False
+    is_ingested: bool = False
     created_at: datetime | None = None
     updated_at: datetime | None = None

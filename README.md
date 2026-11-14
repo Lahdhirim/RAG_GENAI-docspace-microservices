@@ -39,6 +39,12 @@ This separation also keeps the API lightweight, while the heavier Docling depend
 
 ## Graph-RAG Service (Cognee, OpenRouter)
 
+The GraphRAG service ingests parsed Markdown into Cognee and Neo4j, answers questions with graph completion, translates questions into read-only Cypher queries, and exports an interactive HTML graph.
+
+Only the Document Manager accesses the application's MySQL database. It submits completed parsing results and tracks ingestion jobs; GraphRAG processes them serially without Redis. This service currently runs locally alongside the existing Docker services.
+
+See the [GraphRAG setup and API guide](src/services/graph_rag_service/README.md) for configuration, startup commands, job behavior, and request examples.
+
 ## Frontend Application (Codex)
 The frontend is an Angular and TypeScript application designed to provide a modern interface for document management.
 

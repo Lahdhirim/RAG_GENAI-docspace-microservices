@@ -17,3 +17,4 @@ logs/
 commands.txt
 .ruff_cache/
 archive/
+/data/graph_rag/

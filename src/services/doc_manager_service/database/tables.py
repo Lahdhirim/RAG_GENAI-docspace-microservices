@@ -72,6 +72,33 @@ except Exception as e:
     logger.error("[TABLES JOBS] Error creating table: %s", e)
     raise e
 
+ingestion_jobs_creation_query = """
+CREATE TABLE IF NOT EXISTS ingestion_jobs (
+    job_id CHAR(36) PRIMARY KEY,
+    document_id CHAR(64) NOT NULL,
+    parser_job_id VARCHAR(64) NOT NULL,
+    dataset VARCHAR(128) NOT NULL,
+    attempt INT UNSIGNED NOT NULL DEFAULT 1,
+    status ENUM('PENDING', 'QUEUED', 'RUNNING', 'COMPLETED', 'FAILED')
+        NOT NULL DEFAULT 'PENDING',
+    submitted_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    started_at DATETIME NULL,
+    finished_at DATETIME NULL,
+    error TEXT NULL,
+    UNIQUE KEY idx_ingestion_version (document_id, parser_job_id, dataset, attempt),
+    INDEX idx_ingestion_status (dataset, status),
+    FOREIGN KEY (document_id) REFERENCES documents(id),
+    FOREIGN KEY (parser_job_id) REFERENCES jobs(job_id)
+);
+"""
+
+try:
+    cursor.execute(ingestion_jobs_creation_query)
+    logger.info("[TABLES INGESTION JOBS] Table created successfully.")
+except Exception:
+    logger.exception("[TABLES INGESTION JOBS] Could not create the table.")
+    raise
+
 # Close the cursor and connection to the database
 cursor.close()
 connection.close()

@@ -3,6 +3,10 @@ from pathlib import Path
 from threading import Lock
 from typing import Literal
 
+from database.ingestion_queries import (
+    get_ingestion_statuses_query,
+    retry_document_ingestion,
+)
 from database.queries import (
     get_document_query,
     get_documents_query,
@@ -49,6 +53,26 @@ def parsing_statuses():
     with database_lock:
         parsing_statuses = get_parsing_statuses_query()
     return {"statuses": parsing_statuses}
+
+
+@app.get("/ingestion_statuses")
+def ingestion_statuses():
+    """Return graph ingestion attempts with their document names and errors."""
+    with database_lock:
+        statuses = get_ingestion_statuses_query()
+    return {"statuses": statuses}
+
+
+@app.post("/documents/{document_id}/ingestion/retry", status_code=202)
+def retry_ingestion(document_id: str = ApiPath(min_length=1, max_length=64)):
+    """Queue another ingestion attempt for a document whose previous attempt failed."""
+    with database_lock:
+        if get_document_query(document_id) is None:
+            raise HTTPException(status_code=404, detail="Document not found.")
+        try:
+            return retry_document_ingestion(document_id)
+        except ValueError as error:
+            raise HTTPException(status_code=409, detail=str(error)) from None
 
 
 MAX_PREVIEW_BYTES = 50 * 1024 * 1024

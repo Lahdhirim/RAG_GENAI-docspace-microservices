@@ -1,6 +1,7 @@
 import logging
 
 from database.connection import connection
+from database.ingestion_queries import DATASET, DOCUMENT_INGESTION_STATE
 from models.document import Document
 
 logger = logging.getLogger("database")
@@ -89,7 +90,9 @@ def mark_document_as_deleted_query(document_id: str) -> None:
 def get_documents_query() -> list[Document]:
     """Return all documents from the database."""
     try:
-        cursor.execute("SELECT * FROM documents")
+        cursor.execute(
+            f"SELECT d.*, {DOCUMENT_INGESTION_STATE} FROM documents d", (DATASET,)
+        )
         rows = cursor.fetchall()
         documents = []
         for row in rows:
@@ -108,6 +111,7 @@ def get_documents_query() -> list[Document]:
                     submission_status=row["submission_status"],
                     submission_error=row["submission_error"],
                     is_parsed=row["is_parsed"],
+                    is_ingested=bool(row["is_ingested"]),
                     created_at=row["created_at"],
                     updated_at=row["updated_at"],
                 )
@@ -123,7 +127,10 @@ def get_documents_query() -> list[Document]:
 def get_document_query(document_id: str) -> Document | None:
     """Return a document by its ID."""
     try:
-        cursor.execute("SELECT * FROM documents WHERE id = %s", (document_id,))
+        cursor.execute(
+            f"SELECT d.*, {DOCUMENT_INGESTION_STATE} FROM documents d WHERE d.id = %s",
+            (DATASET, document_id),
+        )
         row = cursor.fetchone()
         if row:
             logger.info(f"[GET DOCUMENT] Document found with ID: {document_id}")
@@ -141,6 +148,7 @@ def get_document_query(document_id: str) -> Document | None:
                 submission_status=row["submission_status"],
                 submission_error=row["submission_error"],
                 is_parsed=row["is_parsed"],
+                is_ingested=bool(row["is_ingested"]),
                 created_at=row["created_at"],
                 updated_at=row["updated_at"],
             )
